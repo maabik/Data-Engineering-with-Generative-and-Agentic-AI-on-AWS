@@ -1,0 +1,173 @@
+{
+  "Comment": "Glue ETL pipeline: extract1 || extract2 -> transform -> validate -> publish, with SNS error notification (Chapter 6, p. 264).",
+  "StartAt": "ExtractJobs",
+  "States": {
+    "ExtractJobs": {
+      "Type": "Parallel",
+      "Branches": [
+        {
+          "StartAt": "GlueJobExtract1",
+          "States": {
+            "GlueJobExtract1": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Parameters": {
+                "JobName": "glue-job-extract1"
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Glue.ThrottlingException",
+                    "Glue.AWSGlueException",
+                    "States.TaskFailed"
+                  ],
+                  "IntervalSeconds": 30,
+                  "MaxAttempts": 2,
+                  "BackoffRate": 2.0
+                }
+              ],
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "GlueJobExtract2",
+          "States": {
+            "GlueJobExtract2": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Parameters": {
+                "JobName": "glue-job-extract2"
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Glue.ThrottlingException",
+                    "Glue.AWSGlueException",
+                    "States.TaskFailed"
+                  ],
+                  "IntervalSeconds": 30,
+                  "MaxAttempts": 2,
+                  "BackoffRate": 2.0
+                }
+              ],
+              "End": true
+            }
+          }
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "NotifyFailure"
+        }
+      ],
+      "ResultPath": "$.extractResults",
+      "Next": "GlueJobTransform"
+    },
+    "GlueJobTransform": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "glue-job-transform"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Glue.ThrottlingException",
+            "Glue.AWSGlueException",
+            "States.TaskFailed"
+          ],
+          "IntervalSeconds": 30,
+          "MaxAttempts": 2,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "NotifyFailure"
+        }
+      ],
+      "ResultPath": "$.transformResult",
+      "Next": "GlueJobValidate"
+    },
+    "GlueJobValidate": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "glue-job-validate"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Glue.ThrottlingException",
+            "Glue.AWSGlueException",
+            "States.TaskFailed"
+          ],
+          "IntervalSeconds": 30,
+          "MaxAttempts": 2,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "NotifyFailure"
+        }
+      ],
+      "ResultPath": "$.validateResult",
+      "Next": "GlueJobPublish"
+    },
+    "GlueJobPublish": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "glue-job-publish"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Glue.ThrottlingException",
+            "Glue.AWSGlueException",
+            "States.TaskFailed"
+          ],
+          "IntervalSeconds": 30,
+          "MaxAttempts": 2,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "NotifyFailure"
+        }
+      ],
+      "ResultPath": "$.publishResult",
+      "Next": "Success"
+    },
+    "NotifyFailure": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sns:publish",
+      "Parameters": {
+        "TopicArn.$": "$.errorTopicArn",
+        "Subject": "Glue workflow failure",
+        "Message.$": "States.JsonToString($.error)"
+      },
+      "ResultPath": "$.notifyResult",
+      "Next": "FailState"
+    },
+    "FailState": {
+      "Type": "Fail",
+      "Error": "GlueWorkflowError",
+      "Cause": "One or more Glue jobs failed; failure published to glue-workflow-error SNS topic."
+    },
+    "Success": {
+      "Type": "Succeed"
+    }
+  }
+}

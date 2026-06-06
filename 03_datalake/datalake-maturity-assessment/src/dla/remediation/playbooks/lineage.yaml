@@ -1,0 +1,52 @@
+items:
+  - from_level: 1
+    title: "Enable Glue Data Catalog lineage and emit OpenLineage events"
+    impact: 5
+    effort: M
+    aws_services: [AWS Glue, Amazon DataZone]
+    book_reference: "Chapter 4 — Data Mesh with Amazon DataZone"
+    why_it_matters: |
+      Without lineage you cannot answer "what feeds this dashboard," "which
+      tables would break if I changed this column," or "what does this agent
+      retrieval depend on." Regulators require it for financial, healthcare,
+      and PE-portfolio data.
+    steps:
+      - "Set LineageConfiguration=ENABLE on Glue Crawlers."
+      - "Wire Glue jobs and MWAA tasks to emit OpenLineage events."
+      - "Run Marquez or use DataZone as the lineage store."
+    acceptance_criteria:
+      - "100% of new Glue jobs emit OpenLineage events."
+      - "Lineage queryable for the top-50 tables by access count."
+
+  - from_level: 3
+    title: "Stand up DataZone lineage UI for column-level traceability"
+    impact: 4
+    effort: M
+    aws_services: [Amazon DataZone]
+    book_reference: "Chapter 4 — Data Mesh with Amazon DataZone"
+    why_it_matters: |
+      Column-level lineage is what change-impact analysis actually needs.
+      DataZone offers it without standing up Marquez.
+    steps:
+      - "Stand up DataZone domain (use datazone-as-code)."
+      - "Connect Glue + Athena lineage events."
+      - "Onboard the top-20 critical tables."
+    acceptance_criteria:
+      - "Top-20 tables show column-level lineage in DataZone UI."
+    reference_code: "../../datazone-as-code/"
+
+  - from_level: 4
+    title: "Expose lineage to AI agents via an MCP server"
+    impact: 4
+    effort: M
+    aws_services: [Bedrock AgentCore, Amazon DataZone]
+    book_reference: "Chapter 12 — Building AI Agents with Bedrock AgentCore"
+    why_it_matters: |
+      Lineage queryable by agents flips the model: agents pre-flight changes
+      and reason about blast radius before code review.
+    steps:
+      - "Build an MCP server fronting DataZone lineage APIs."
+      - "Register the MCP server in AgentCore Gateway."
+      - "Wire to a Strands agent for change-impact queries."
+    acceptance_criteria:
+      - "Strands agent answers 'what does X depend on' from live lineage."

@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "s3vectors-rag"
+version = "0.1.0"
+description = "RAG demo on Amazon S3 Vectors with Bedrock Titan embeddings"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "boto3>=1.34.0",
+    "botocore>=1.34.0",
+]
+
+[project.optional-dependencies]
+loaders = ["pypdf>=4.0"]
+tokenizers = ["tiktoken>=0.7"]
+notebook = ["jupyter>=1.0", "ipykernel>=6"]
+test = [
+    "pytest>=7",
+    "pytest-mock>=3",
+]
+all = [
+    "pypdf>=4.0",
+    "tiktoken>=0.7",
+    "pytest>=7",
+    "pytest-mock>=3",
+    "jupyter>=1.0",
+    "ipykernel>=6",
+]
+
+[project.scripts]
+s3v-rag = "s3vectors_rag.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

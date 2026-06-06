@@ -1,0 +1,420 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Description: >
+  Custom AWS Config rules for GenAI and MCP security risks.
+  Deploys 9 rules covering Bedrock invocation logging, guardrail attachment,
+  Knowledge Base encryption, Lambda URL auth, KMS rotation, agent
+  least-privilege, S3 public access, CloudTrail data events, and MCP server
+  authentication.
+
+Parameters:
+  LambdaCodeBucket:
+    Type: String
+    Description: S3 bucket containing the zipped rule Lambda code (rules.zip)
+
+  LambdaCodeKey:
+    Type: String
+    Default: config-rules-for-genai/rules.zip
+    Description: S3 key for the rules zip
+
+  McpTagKey:
+    Type: String
+    Default: MCPServer
+    Description: Tag key identifying MCP server Lambda functions
+
+  McpTagValue:
+    Type: String
+    Default: "true"
+    Description: Tag value identifying MCP server Lambda functions
+
+  AiWorkloadTagKey:
+    Type: String
+    Default: Workload
+    Description: Tag key for AI workload resources (KMS, Lambda URLs)
+
+  AiDataTagKey:
+    Type: String
+    Default: DataClassification
+    Description: Tag key for AI data S3 buckets
+
+  RequiredProvisionedThroughputTags:
+    Type: String
+    Default: "DataClassification,Team,Environment"
+    Description: Comma-separated required tags for Bedrock provisioned throughput
+
+  ConfigRulePrefix:
+    Type: String
+    Default: genai
+    Description: Prefix added to every Config rule name
+
+Globals:
+  Function:
+    Runtime: python3.11
+    Timeout: 60
+    MemorySize: 128
+    CodeUri:
+      Bucket: !Ref LambdaCodeBucket
+      Key: !Ref LambdaCodeKey
+    Layers: []
+    Environment:
+      Variables:
+        PYTHONPATH: /var/task
+
+Resources:
+
+  # ── Shared execution role ─────────────────────────────────────────────────
+  ConfigRuleRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ConfigRulePrefix}-config-rule-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: ConfigPutEvaluations
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: config:PutEvaluations
+                Resource: "*"
+
+  # ── 1. Bedrock invocation logging enabled ─────────────────────────────────
+  BedrockInvocationLoggingFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${ConfigRulePrefix}-bedrock-invocation-logging"
+      Handler: rules/bedrock_invocation_logging_enabled.lambda_handler
+      Role: !GetAtt ConfigRuleRole.Arn
+
+  BedrockInvocationLoggingPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt BedrockInvocationLoggingFn.Arn
+      Principal: config.amazonaws.com
+
+  BedrockInvocationLoggingRule:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: !Sub "${ConfigRulePrefix}-bedrock-invocation-logging-enabled"
+      Description: >
+        Checks that Bedrock model invocation logging is enabled with at least
+        one destination (CloudWatch Logs or S3).
+      Source:
+        Owner: CUSTOM_LAMBDA
+        SourceIdentifier: !GetAtt BedrockInvocationLoggingFn.Arn
+        SourceDetails:
+          - EventSource: aws.config
+            MessageType: ConfigurationItemChangeNotification
+      Scope:
+        ComplianceResourceTypes:
+          - AWS::Bedrock::ModelInvocationLoggingConfiguration
+    DependsOn: BedrockInvocationLoggingPermission
+
+  # ── 2. Bedrock guardrail attached ─────────────────────────────────────────
+  BedrockGuardrailAttachedFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${ConfigRulePrefix}-bedrock-guardrail-attached"
+      Handler: rules/bedrock_guardrail_attached.lambda_handler
+      Role: !GetAtt ConfigRuleRole.Arn
+
+  BedrockGuardrailAttachedPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt BedrockGuardrailAttachedFn.Arn
+      Principal: config.amazonaws.com
+
+  BedrockGuardrailAttachedRule:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: !Sub "${ConfigRulePrefix}-bedrock-guardrail-attached"
+      Description: >
+        Checks that every Bedrock Agent has a Guardrail attached.
+      Source:
+        Owner: CUSTOM_LAMBDA
+        SourceIdentifier: !GetAtt BedrockGuardrailAttachedFn.Arn
+        SourceDetails:
+          - EventSource: aws.config
+            MessageType: ConfigurationItemChangeNotification
+      Scope:
+        ComplianceResourceTypes:
+          - AWS::Bedrock::Agent
+    DependsOn: BedrockGuardrailAttachedPermission
+
+  # ── 3. Bedrock KB encryption with CMK ─────────────────────────────────────
+  BedrockKbCmkFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${ConfigRulePrefix}-bedrock-kb-encryption-cmk"
+      Handler: rules/bedrock_kb_encryption_cmk.lambda_handler
+      Role: !GetAtt ConfigRuleRole.Arn
+
+  BedrockKbCmkPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt BedrockKbCmkFn.Arn
+      Principal: config.amazonaws.com
+
+  BedrockKbCmkRule:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: !Sub "${ConfigRulePrefix}-bedrock-kb-encryption-cmk"
+      Description: >
+        Checks that every Bedrock Knowledge Base is encrypted with a
+        customer-managed KMS key.
+      Source:
+        Owner: CUSTOM_LAMBDA
+        SourceIdentifier: !GetAtt BedrockKbCmkFn.Arn
+        SourceDetails:
+          - EventSource: aws.config
+            MessageType: ConfigurationItemChangeNotification
+      Scope:
+        ComplianceResourceTypes:
+          - AWS::Bedrock::KnowledgeBase
+    DependsOn: BedrockKbCmkPermission
+
+  # ── 4. Lambda Function URL auth required ──────────────────────────────────
+  LambdaUrlAuthFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${ConfigRulePrefix}-lambda-url-auth-required"
+      Handler: rules/lambda_url_auth_required.lambda_handler
+      Role: !GetAtt ConfigRuleRole.Arn
+
+  LambdaUrlAuthPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt LambdaUrlAuthFn.Arn
+      Principal: config.amazonaws.com
+
+  LambdaUrlAuthRule:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: !Sub "${ConfigRulePrefix}-lambda-url-auth-required"
+      Description: >
+        Checks that Lambda Function URLs on AI workload functions use
+        AuthType=AWS_IAM (not NONE).
+      InputParameters:
+        tag_key: !Ref AiWorkloadTagKey
+        tag_value: ""
+      Source:
+        Owner: CUSTOM_LAMBDA
+        SourceIdentifier: !GetAtt LambdaUrlAuthFn.Arn
+        SourceDetails:
+          - EventSource: aws.config
+            MessageType: ConfigurationItemChangeNotification
+      Scope:
+        ComplianceResourceTypes:
+          - AWS::Lambda::Url
+    DependsOn: LambdaUrlAuthPermission
+
+  # ── 5. KMS CMK rotation for AI workloads ──────────────────────────────────
+  KmsCmkRotationFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${ConfigRulePrefix}-kms-cmk-rotation-ai-workloads"
+      Handler: rules/kms_cmk_rotation_ai_workloads.lambda_handler
+      Role: !GetAtt ConfigRuleRole.Arn
+
+  KmsCmkRotationPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt KmsCmkRotationFn.Arn
+      Principal: config.amazonaws.com
+
+  KmsCmkRotationRule:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: !Sub "${ConfigRulePrefix}-kms-cmk-rotation-ai-workloads"
+      Description: >
+        Checks that KMS CMKs for AI workloads have rotation enabled and are
+        single-region keys.
+      InputParameters:
+        tag_key: !Ref AiWorkloadTagKey
+        allow_multi_region: "false"
+      Source:
+        Owner: CUSTOM_LAMBDA
+        SourceIdentifier: !GetAtt KmsCmkRotationFn.Arn
+        SourceDetails:
+          - EventSource: aws.config
+            MessageType: ConfigurationItemChangeNotification
+      Scope:
+        ComplianceResourceTypes:
+          - AWS::KMS::Key
+    DependsOn: KmsCmkRotationPermission
+
+  # ── 6. Bedrock agent least-privilege role ─────────────────────────────────
+  BedrockAgentLeastPrivFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${ConfigRulePrefix}-bedrock-agent-least-privilege"
+      Handler: rules/bedrock_agent_least_privilege.lambda_handler
+      Role: !GetAtt ConfigRuleRole.Arn
+
+  BedrockAgentLeastPrivPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt BedrockAgentLeastPrivFn.Arn
+      Principal: config.amazonaws.com
+
+  BedrockAgentLeastPrivRule:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: !Sub "${ConfigRulePrefix}-bedrock-agent-least-privilege"
+      Description: >
+        Checks that Bedrock Agent execution roles do not use wildcard admin
+        patterns (AdminRole, PowerUser, FullAccess).
+      Source:
+        Owner: CUSTOM_LAMBDA
+        SourceIdentifier: !GetAtt BedrockAgentLeastPrivFn.Arn
+        SourceDetails:
+          - EventSource: aws.config
+            MessageType: ConfigurationItemChangeNotification
+      Scope:
+        ComplianceResourceTypes:
+          - AWS::Bedrock::Agent
+    DependsOn: BedrockAgentLeastPrivPermission
+
+  # ── 7. S3 AI data no public access ────────────────────────────────────────
+  S3AiDataNoPublicFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${ConfigRulePrefix}-s3-ai-data-no-public-access"
+      Handler: rules/s3_ai_data_no_public_access.lambda_handler
+      Role: !GetAtt ConfigRuleRole.Arn
+
+  S3AiDataNoPublicPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt S3AiDataNoPublicFn.Arn
+      Principal: config.amazonaws.com
+
+  S3AiDataNoPublicRule:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: !Sub "${ConfigRulePrefix}-s3-ai-data-no-public-access"
+      Description: >
+        Checks that S3 buckets holding AI training data or model artefacts
+        have all four Block Public Access flags enabled.
+      InputParameters:
+        tag_key: !Ref AiDataTagKey
+        tag_value: ""
+      Source:
+        Owner: CUSTOM_LAMBDA
+        SourceIdentifier: !GetAtt S3AiDataNoPublicFn.Arn
+        SourceDetails:
+          - EventSource: aws.config
+            MessageType: ConfigurationItemChangeNotification
+      Scope:
+        ComplianceResourceTypes:
+          - AWS::S3::Bucket
+    DependsOn: S3AiDataNoPublicPermission
+
+  # ── 8. CloudTrail Bedrock data events ─────────────────────────────────────
+  CloudtrailBedrockDataEventsFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${ConfigRulePrefix}-cloudtrail-bedrock-data-events"
+      Handler: rules/cloudtrail_bedrock_data_events.lambda_handler
+      Role: !GetAtt ConfigRuleRole.Arn
+
+  CloudtrailBedrockDataEventsPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt CloudtrailBedrockDataEventsFn.Arn
+      Principal: config.amazonaws.com
+
+  CloudtrailBedrockDataEventsRule:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: !Sub "${ConfigRulePrefix}-cloudtrail-bedrock-data-events"
+      Description: >
+        Checks that a CloudTrail trail logs data events for Bedrock
+        (InvokeModel, InvokeAgent, etc.).
+      Source:
+        Owner: CUSTOM_LAMBDA
+        SourceIdentifier: !GetAtt CloudtrailBedrockDataEventsFn.Arn
+        SourceDetails:
+          - EventSource: aws.config
+            MessageType: ConfigurationItemChangeNotification
+      Scope:
+        ComplianceResourceTypes:
+          - AWS::CloudTrail::Trail
+    DependsOn: CloudtrailBedrockDataEventsPermission
+
+  # ── 9. MCP server auth required ───────────────────────────────────────────
+  McpServerAuthFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${ConfigRulePrefix}-mcp-server-auth-required"
+      Handler: rules/mcp_server_auth_required.lambda_handler
+      Role: !GetAtt ConfigRuleRole.Arn
+
+  McpServerAuthPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt McpServerAuthFn.Arn
+      Principal: config.amazonaws.com
+
+  McpServerAuthRule:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: !Sub "${ConfigRulePrefix}-mcp-server-auth-required"
+      Description: >
+        Checks that Lambda functions tagged as MCP servers use either
+        OAuth 2.1 (env MCP_AUTH_TYPE=oauth) or SigV4 (Function URL
+        with AuthType=AWS_IAM).
+      InputParameters:
+        tag_key: !Ref McpTagKey
+        tag_value: !Ref McpTagValue
+      Source:
+        Owner: CUSTOM_LAMBDA
+        SourceIdentifier: !GetAtt McpServerAuthFn.Arn
+        SourceDetails:
+          - EventSource: aws.config
+            MessageType: ConfigurationItemChangeNotification
+      Scope:
+        ComplianceResourceTypes:
+          - AWS::Lambda::Function
+    DependsOn: McpServerAuthPermission
+
+Outputs:
+  ConfigRuleRoleArn:
+    Value: !GetAtt ConfigRuleRole.Arn
+    Description: IAM role shared by all Config rule Lambdas
+
+  BedrockInvocationLoggingRuleName:
+    Value: !Ref BedrockInvocationLoggingRule
+  BedrockGuardrailAttachedRuleName:
+    Value: !Ref BedrockGuardrailAttachedRule
+  BedrockKbCmkRuleName:
+    Value: !Ref BedrockKbCmkRule
+  LambdaUrlAuthRuleName:
+    Value: !Ref LambdaUrlAuthRule
+  KmsCmkRotationRuleName:
+    Value: !Ref KmsCmkRotationRule
+  BedrockAgentLeastPrivRuleName:
+    Value: !Ref BedrockAgentLeastPrivRule
+  S3AiDataNoPublicRuleName:
+    Value: !Ref S3AiDataNoPublicRule
+  CloudtrailBedrockDataEventsRuleName:
+    Value: !Ref CloudtrailBedrockDataEventsRule
+  McpServerAuthRuleName:
+    Value: !Ref McpServerAuthRule

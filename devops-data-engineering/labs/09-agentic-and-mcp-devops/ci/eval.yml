@@ -1,0 +1,51 @@
+name: agent-eval
+
+on:
+  pull_request:
+    paths:
+      - "labs/09-agentic-and-mcp-devops/prompts/**"
+      - "labs/09-agentic-and-mcp-devops/tools/**"
+      - "labs/09-agentic-and-mcp-devops/evals/**"
+      - "labs/09-agentic-and-mcp-devops/terraform/**"
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    environment: sandbox
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.SANDBOX_DEPLOY_ROLE }}
+          aws-region: us-east-1
+      - run: pip install boto3
+      - id: eval
+        run: |
+          python labs/09-agentic-and-mcp-devops/evals/run_evals.py \
+            --agent-arn ${{ vars.SANDBOX_AGENT_ARN }} \
+            --dataset labs/09-agentic-and-mcp-devops/evals/sales_questions.jsonl \
+            --baseline labs/09-agentic-and-mcp-devops/evals/baseline.json \
+            --report eval-report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-report
+          path: eval-report.json
+      - name: Comment summary on PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const r = JSON.parse(fs.readFileSync('eval-report.json'));
+            const fails = r.failures.length ? r.failures.join('\n  - ') : 'none';
+            const body = `**Agent eval**\n- pass rate: ${(r.summary.pass_rate*100).toFixed(1)}%\n- p95 latency: ${r.summary.latency_p95.toFixed(2)}s\n- avg cost: $${r.summary.cost_avg.toFixed(4)}\n- failures: \n  - ${fails}`;
+            github.rest.issues.createComment({issue_number: context.issue.number, owner: context.repo.owner, repo: context.repo.repo, body});

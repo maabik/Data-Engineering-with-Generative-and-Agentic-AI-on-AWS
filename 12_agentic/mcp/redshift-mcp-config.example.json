@@ -1,0 +1,21 @@
+{
+  "_comment": "Copy to redshift-mcp-config.json and fill in your values. The runtime file is gitignored.",
+  "mcpServers": {
+    "redshift": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--network=host",
+        "-e", "REDSHIFT_HOST=<your-cluster>.redshift.amazonaws.com",
+        "-e", "REDSHIFT_PORT=5439",
+        "-e", "REDSHIFT_DATABASE=<database>",
+        "-e", "REDSHIFT_USER=<user>",
+        "-e", "REDSHIFT_PASSWORD=<password>",
+        "-e", "AWS_REGION=us-east-1",
+        "public.ecr.aws/awslabs-mcp/awslabs/redshift-mcp-server:latest"
+      ]
+    }
+  }
+}

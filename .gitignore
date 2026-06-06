@@ -1,0 +1,50 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+htmlcov/
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+*_env/
+*-env/
+
+# CDK synthesised output
+cdk.out/
+
+# Node
+node_modules/
+
+# Logs (sample logs under */sample/* are intentional and re-included below)
+*.log
+!06_orchestration/log-analysis-agent/sample/*.log
+
+# Large binaries
+*.pdf
+
+# IDE
+.vscode/
+.idea/
+
+# Local secrets / env files
+.env
+.env.local
+
+# AgentCore state files (per-account, written by agentcore CLI)
+.bedrock_agentcore.yaml
+
+# Vendored upstream packages (fetch at deploy time)
+12_agentic/mcp/redshift-mcp-server/
+12_agentic/mcp/agentcore mcp server/redshift-mcp-server/
+12_agentic/mcp/02-hosting-MCP-server/awslabs/

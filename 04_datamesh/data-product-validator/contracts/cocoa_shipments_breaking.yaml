@@ -1,0 +1,26 @@
+# Intentionally-broken contract: pretends the live asset has columns it does
+# not, and demands a different type for one it does -- used to demonstrate
+# the breaking-change gate.
+asset: cocoa_shipments
+project: chocolate-producer
+description: Demo asset for cocoa_shipments (cross-domain-lineage seed)
+
+columns:
+  - name: id
+    type: string
+    required: true
+  - name: amount
+    type: long              # live is double => BREAKING type change
+    required: true
+  - name: ts
+    type: timestamp
+    required: true
+  - name: shipment_origin   # not in live asset => BREAKING (required missing)
+    type: string
+    required: true
+
+glossary_terms:
+  - Cocoa
+
+deprecated_columns:
+  - amount                  # we say it's deprecated but it's still present => warning

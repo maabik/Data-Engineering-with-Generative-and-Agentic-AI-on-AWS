@@ -1,0 +1,152 @@
+name: Prompt Injection Harness CI
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "02_security/prompt-injection-test-harness/**"
+  pull_request:
+    paths:
+      - "02_security/prompt-injection-test-harness/**"
+  workflow_dispatch:
+    inputs:
+      model_id:
+        description: "Bedrock model ID to test against (leave empty to skip live tests)"
+        required: false
+        default: ""
+      aws_region:
+        description: "AWS region"
+        required: false
+        default: "us-west-2"
+
+jobs:
+  # ── Unit tests (no AWS creds needed) ─────────────────────────────────────
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 02_security/prompt-injection-test-harness
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Validate payload corpus (schema + count)
+        run: pytest tests/test_payloads.py -v
+
+      - name: Run detector unit tests
+        run: pytest tests/test_detectors.py -v
+
+      - name: Run runner integration tests (stub target)
+        run: pytest tests/test_runner.py -v
+
+      - name: Run reporter tests
+        run: pytest tests/test_reporter.py -v
+
+      - name: Full unit suite with JUnit output
+        run: |
+          pytest tests/ -v \
+            --junit-xml=test-results/unit.xml \
+            --tb=short
+
+      - name: Upload unit test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: 02_security/prompt-injection-test-harness/test-results/
+
+  # ── Payload corpus validation ─────────────────────────────────────────────
+  corpus-lint:
+    name: Corpus lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 02_security/prompt-injection-test-harness
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Check minimum payload count
+        run: |
+          COUNT=$(pi-harness list --count)
+          echo "Payload count: $COUNT"
+          [ "$COUNT" -ge 200 ] || (echo "Payload count below 200!" && exit 1)
+
+      - name: Dump payload list
+        run: pi-harness list
+
+  # ── Live model tests (optional, requires AWS creds + model_id input) ──────
+  live-bedrock:
+    name: Live Bedrock test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.model_id != ''
+    needs: unit-tests
+    defaults:
+      run:
+        working-directory: 02_security/prompt-injection-test-harness
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ github.event.inputs.aws_region || 'us-west-2' }}
+
+      - name: Run harness against Bedrock model
+        run: |
+          pi-harness run \
+            --model-id "${{ github.event.inputs.model_id }}" \
+            --region "${{ github.event.inputs.aws_region || 'us-west-2' }}" \
+            --workers 4 \
+            --junit-out results/live-bedrock.xml \
+            --json-out results/live-bedrock.json \
+            --verbose
+
+      - name: Upload live test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-bedrock-results
+          path: 02_security/prompt-injection-test-harness/results/
+
+      - name: Publish test results
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: 02_security/prompt-injection-test-harness/results/live-bedrock.xml
+          check_name: "Prompt Injection Results"
+          comment_mode: always

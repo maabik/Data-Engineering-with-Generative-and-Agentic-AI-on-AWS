@@ -1,0 +1,106 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "RedshiftDataAgainstSalesDemoCluster",
+            "Effect": "Allow",
+            "Action": [
+                "redshift-data:BatchExecuteStatement",
+                "redshift-data:ExecuteStatement"
+            ],
+            "Resource": "arn:aws:redshift:*:*:cluster:sales-demo-cluster"
+        },
+        {
+            "Sid": "RedshiftDataStatementLifecycle",
+            "Effect": "Allow",
+            "Action": [
+                "redshift-data:CancelStatement",
+                "redshift-data:DescribeStatement",
+                "redshift-data:GetStatementResult",
+                "redshift-data:ListStatements"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "RedshiftClusterIntrospection",
+            "Effect": "Allow",
+            "Action": [
+                "redshift:DescribeClusters",
+                "redshift:GetClusterCredentials",
+                "redshift:ListDatabases",
+                "redshift:ListSchemas",
+                "redshift:ListTables",
+                "redshift:DescribeTable"
+            ],
+            "Resource": [
+                "arn:aws:redshift:*:*:cluster:sales-demo-cluster",
+                "arn:aws:redshift:*:*:dbuser:sales-demo-cluster/*",
+                "arn:aws:redshift:*:*:dbname:sales-demo-cluster/*"
+            ]
+        },
+        {
+            "Sid": "RedshiftServerlessIntrospection",
+            "Effect": "Allow",
+            "Action": [
+                "redshift-serverless:GetCredentials"
+            ],
+            "Resource": "arn:aws:redshift-serverless:*:*:workgroup/*"
+        },
+        {
+            "Sid": "RedshiftServerlessList",
+            "Effect": "Allow",
+            "Action": [
+                "redshift-serverless:ListWorkgroups",
+                "redshift-serverless:ListNamespaces"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "SecretsManagerForRedshiftCredentials",
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue"
+            ],
+            "Resource": [
+                "arn:aws:secretsmanager:*:*:secret:redshift!*",
+                "arn:aws:secretsmanager:*:*:secret:redshift-demo-*"
+            ]
+        },
+        {
+            "Sid": "SecretsManagerList",
+            "Effect": "Allow",
+            "Action": "secretsmanager:ListSecrets",
+            "Resource": "*"
+        },
+        {
+            "Sid": "BedrockInvokeForTextToSQL",
+            "Effect": "Allow",
+            "Action": "bedrock:InvokeModel",
+            "Resource": [
+                "arn:aws:bedrock:*::foundation-model/anthropic.claude-sonnet-*",
+                "arn:aws:bedrock:*::foundation-model/anthropic.claude-3-5-sonnet-*",
+                "arn:aws:bedrock:*:*:inference-profile/us.anthropic.claude-sonnet-*"
+            ]
+        },
+        {
+            "Sid": "BedrockListModelsRequiresStar",
+            "Effect": "Allow",
+            "Action": "bedrock:ListFoundationModels",
+            "Resource": "*"
+        },
+        {
+            "Sid": "S3AccessForQueryResults",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:ListBucket",
+                "s3:GetBucketLocation"
+            ],
+            "Resource": [
+                "arn:aws:s3:::redshift-query-editor-*",
+                "arn:aws:s3:::redshift-query-editor-*/*"
+            ]
+        }
+    ]
+}

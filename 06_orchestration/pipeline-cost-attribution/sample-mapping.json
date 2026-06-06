@@ -1,0 +1,40 @@
+{
+  "rules": [
+    {
+      "match": "dq-demo-*",
+      "tags": {
+        "team": "data-quality",
+        "business_unit": "platform",
+        "pipeline_id": "dq-demo",
+        "env": "dev"
+      }
+    },
+    {
+      "match": "sfn-gen-*",
+      "tags": {
+        "team": "platform-engineering",
+        "business_unit": "platform",
+        "pipeline_id": "sfn-generator",
+        "env": "dev"
+      }
+    },
+    {
+      "match": "ingest-*",
+      "tags": {
+        "team": "ingestion",
+        "business_unit": "data-platform",
+        "pipeline_id": "ingestion-default",
+        "env": "prod"
+      }
+    },
+    {
+      "match": "billing-*",
+      "tags": {
+        "team": "finance",
+        "business_unit": "finance",
+        "pipeline_id": "billing-etl",
+        "env": "prod"
+      }
+    }
+  ]
+}

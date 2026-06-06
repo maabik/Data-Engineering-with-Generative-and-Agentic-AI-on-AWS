@@ -1,0 +1,13 @@
+weights:
+  storage_format: 1.0
+  catalog_schema: 1.0
+  access_security: 1.0
+  quality_observability: 1.0
+  performance_ingestion: 1.0
+  cost_lifecycle: 1.0
+  lineage: 1.0
+  ai_readiness: 1.0
+
+targets:
+  default_target_level: 4
+  minimum_acceptable: 2

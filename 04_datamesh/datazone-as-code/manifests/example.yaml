@@ -1,0 +1,51 @@
+# datazone-as-code example manifest
+# A producer/consumer data mesh for a fictional chocolate factory.
+#
+# Resources created (in this order):
+#   1. IAM role (domain execution role) -- auto-created if "domain.execution_role" omitted
+#   2. DataZone domain
+#   3. Domain units (optional hierarchical grouping under root)
+#   4. Projects (producer + consumer)
+#   5. Glossaries with terms (owned by a project)
+#
+# Apply:    python -m dzac apply --manifest manifests/example.yaml --profile default
+# Destroy:  python -m dzac destroy --profile default
+
+domain:
+  name: chocolate-mesh
+  description: Chocolate factory data mesh -- producer/consumer demo
+  # version: V1 (default, only needs execution role)
+  # version: V2 (newer, also requires "service_role" ARN -- see README)
+  version: V1
+  tags:
+    project: datazone-as-code
+    env: demo
+
+domain_units:
+  - key: production
+    name: production
+  - key: analytics
+    name: analytics
+
+projects:
+  - key: producer
+    name: chocolate-producer
+    description: Producer project owning raw cocoa + sales tables
+    domain_unit: production
+  - key: consumer
+    name: chocolate-consumer
+    description: Consumer project that subscribes to producer assets
+    domain_unit: analytics
+
+glossaries:
+  - key: business-terms
+    name: BusinessTerms
+    description: Core business terminology for the chocolate factory
+    owning_project: producer
+    terms:
+      - name: Revenue
+        short_description: Net top-line dollars after returns
+      - name: Customer
+        short_description: An entity (B2B or D2C) that purchased product
+      - name: Cocoa
+        short_description: Raw fermented cocoa beans sourced from origin

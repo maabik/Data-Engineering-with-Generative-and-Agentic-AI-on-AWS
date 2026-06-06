@@ -1,0 +1,14 @@
+[sqlfluff]
+# Default to Athena's Presto/Trino dialect since most queries in the
+# reference pipeline target Athena. Override per-file with `-- sqlfluff:dialect=...`.
+dialect = athena
+templater = jinja
+exclude_rules = L016,L034
+max_line_length = 120
+
+[sqlfluff:indentation]
+tab_space_size = 2
+indent_unit = space
+
+[sqlfluff:rules:capitalisation.keywords]
+capitalisation_policy = upper

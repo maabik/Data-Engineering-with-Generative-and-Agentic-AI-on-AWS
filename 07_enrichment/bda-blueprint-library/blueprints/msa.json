@@ -1,0 +1,116 @@
+{
+  "class": "MasterServicesAgreement",
+  "description": "Master Services Agreement (MSA) governing the framework relationship between a customer and a service provider. Captures parties, term, payment terms, and key risk-allocation clauses.",
+  "properties": {
+    "agreement_title": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Title of the agreement as stated on page 1"
+    },
+    "effective_date": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Effective date of the agreement"
+    },
+    "execution_date": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Date last party signed, if different from effective date"
+    },
+    "customer_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Legal name of the customer / client"
+    },
+    "customer_address": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Customer notice address"
+    },
+    "customer_state_of_formation": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Customer state / jurisdiction of formation"
+    },
+    "provider_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Legal name of the service provider"
+    },
+    "provider_address": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Provider notice address"
+    },
+    "provider_state_of_formation": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Provider state / jurisdiction of formation"
+    },
+    "initial_term": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Initial term length (e.g. 24 months, 3 years)"
+    },
+    "renewal_term": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Auto-renewal term length and conditions"
+    },
+    "termination_for_convenience_notice_days": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Days of prior written notice required to terminate for convenience"
+    },
+    "payment_terms": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Payment terms (e.g. Net 30 from invoice date)"
+    },
+    "late_fee_rate": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Late fee or interest rate on overdue amounts"
+    },
+    "liability_cap": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Cap on aggregate liability (e.g. fees paid in prior 12 months)"
+    },
+    "consequential_damages_waived": {
+      "type": "boolean",
+      "inferenceType": "explicit",
+      "instruction": "Whether consequential / indirect damages are mutually waived"
+    },
+    "indemnification_summary": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Short summary of indemnification obligations"
+    },
+    "ip_ownership": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Who owns deliverables and pre-existing IP"
+    },
+    "confidentiality_term_years": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Number of years confidentiality obligations survive"
+    },
+    "governing_law": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Governing-law jurisdiction"
+    },
+    "dispute_resolution": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Dispute-resolution forum (courts, arbitration body, venue)"
+    },
+    "assignment_allowed": {
+      "type": "boolean",
+      "inferenceType": "explicit",
+      "instruction": "Whether assignment is permitted without consent (other than affiliate / change-of-control)"
+    }
+  }
+}

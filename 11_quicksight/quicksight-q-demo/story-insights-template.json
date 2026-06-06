@@ -1,0 +1,41 @@
+{
+    "story_insights": {
+        "auto_generated_insights": [
+            {
+                "insight_type": "trend",
+                "title": "Sales Growth Acceleration",
+                "description": "Sales have shown consistent month-over-month growth with acceleration in recent quarters",
+                "confidence": "high",
+                "supporting_data": "Monthly sales data showing 15% average growth rate"
+            },
+            {
+                "insight_type": "anomaly",
+                "title": "Regional Performance Variance",
+                "description": "Significant performance differences between regions suggest optimization opportunities",
+                "confidence": "medium",
+                "supporting_data": "Regional sales variance analysis"
+            },
+            {
+                "insight_type": "opportunity",
+                "title": "Product Mix Optimization",
+                "description": "High-margin products represent growth opportunity with focused promotion",
+                "confidence": "high",
+                "supporting_data": "Profit margin analysis by product category"
+            }
+        ],
+        "narrative_elements": [
+            {
+                "section": "executive_summary",
+                "narrative": "Our sales performance demonstrates strong fundamentals with clear opportunities for optimization across geographic and product dimensions."
+            },
+            {
+                "section": "key_findings",
+                "narrative": "Three primary areas emerge as focus points: regional expansion, product mix optimization, and customer segment development."
+            },
+            {
+                "section": "recommendations",
+                "narrative": "Immediate actions should focus on high-impact, low-risk initiatives that leverage existing strengths while addressing identified gaps."
+            }
+        ]
+    }
+}

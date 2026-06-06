@@ -1,0 +1,207 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "S3AccountInventoryRequiresStar",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListAllMyBuckets",
+        "s3:GetBucketLocation",
+        "s3:GetBucketEncryption",
+        "s3:GetPublicAccessBlock",
+        "s3:GetBucketLifecycleConfiguration",
+        "s3:GetBucketTagging",
+        "s3:GetBucketReplication",
+        "s3:ListBucket"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "GlueCatalogReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "glue:GetDatabases",
+        "glue:GetTables",
+        "glue:GetTable",
+        "glue:GetPartitions",
+        "glue:GetCrawlers",
+        "glue:GetCrawler",
+        "glue:GetJobs",
+        "glue:GetJob",
+        "glue:GetTriggers"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": [
+            "us-east-1",
+            "us-west-2"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "LakeFormationReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "lakeformation:GetDataLakeSettings",
+        "lakeformation:ListPermissions",
+        "lakeformation:ListLFTags",
+        "lakeformation:ListResources"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "S3TablesReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "s3tables:ListTableBuckets",
+        "s3tables:ListNamespaces",
+        "s3tables:ListTables"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "KmsListAndDescribe",
+      "Effect": "Allow",
+      "Action": [
+        "kms:ListKeys",
+        "kms:DescribeKey"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": [
+            "us-east-1",
+            "us-west-2"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "AthenaReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "athena:ListWorkGroups",
+        "athena:GetWorkGroup",
+        "athena:ListQueryExecutions",
+        "athena:BatchGetQueryExecution"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": [
+            "us-east-1",
+            "us-west-2"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "BedrockKbReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:ListKnowledgeBases",
+        "bedrock:ListDataSources",
+        "bedrock:ListAgents"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": [
+            "us-east-1",
+            "us-west-2"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "S3VectorsReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "s3vectors:ListVectorBuckets",
+        "s3vectors:ListIndexes"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "OpenSearchReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "es:ListDomainNames",
+        "aoss:ListCollections"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": [
+            "us-east-1",
+            "us-west-2"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "DataZoneReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "datazone:ListDomains",
+        "datazone:ListProjects",
+        "datazone:Search"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": [
+            "us-east-1",
+            "us-west-2"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "AgentCoreReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock-agentcore:ListGateways",
+        "bedrock-agentcore:ListAgentRuntimes"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": [
+            "us-east-1",
+            "us-west-2"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "CostExplorerReadOnlyGlobal",
+      "Effect": "Allow",
+      "Action": [
+        "ce:ListCostAllocationTags",
+        "ce:GetAnomalyMonitors",
+        "ce:GetAnomalySubscriptions",
+        "ce:GetCostAndUsage"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudTrailReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "cloudtrail:DescribeTrails"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "Sts",
+      "Effect": "Allow",
+      "Action": [
+        "sts:GetCallerIdentity"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

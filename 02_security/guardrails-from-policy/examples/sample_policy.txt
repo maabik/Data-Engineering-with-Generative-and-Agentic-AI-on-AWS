@@ -1,0 +1,123 @@
+ACME CORPORATION — DATA CLASSIFICATION AND ACCEPTABLE USE POLICY
+Version 3.1 | Effective: 2026-01-01 | Owner: Chief Information Security Officer
+
+─────────────────────────────────────────────────────────
+1. PURPOSE AND SCOPE
+─────────────────────────────────────────────────────────
+This policy defines how ACME Corporation classifies, handles, and protects
+information assets. It applies to all employees, contractors, vendors, and AI
+systems acting on behalf of ACME Corporation.
+
+─────────────────────────────────────────────────────────
+2. DATA CLASSIFICATION TIERS
+─────────────────────────────────────────────────────────
+
+2.1 PUBLIC
+Description: Information approved for unrestricted public disclosure.
+Examples: Marketing materials, press releases, published product documentation.
+Handling: No special controls required.
+
+2.2 INTERNAL
+Description: General business information not intended for external audiences.
+Examples: Internal memos, org charts, meeting notes, project status updates.
+Handling: Must not be shared outside ACME without authorization. Employee
+  credentials required to access internal systems.
+
+2.3 CONFIDENTIAL
+Description: Sensitive business information where unauthorized disclosure could
+  harm ACME or its customers.
+Examples: Financial forecasts, customer contracts, HR records, product roadmaps,
+  pricing strategies, M&A discussions.
+Handling: Shared on a need-to-know basis. Encryption required in transit and at
+  rest. Access logged and auditable.
+PII present: Customer names, email addresses, phone numbers, billing addresses,
+  credit card numbers.
+
+2.4 RESTRICTED
+Description: Highest sensitivity. Unauthorized disclosure causes severe harm.
+Examples: AWS account credentials, API keys, encryption keys, social security
+  numbers, health records (PHI/HIPAA), source code for core products.
+Handling: Access requires explicit written approval from the CISO. Encryption
+  with customer-managed KMS keys mandatory. No AI system may output Restricted
+  data verbatim under any circumstances.
+PII present: Social Security Numbers, passwords, AWS secret keys, bank account
+  numbers, health information.
+
+─────────────────────────────────────────────────────────
+3. PROHIBITED TOPICS AND ACTIVITIES
+─────────────────────────────────────────────────────────
+
+AI systems deployed by ACME must refuse requests on the following topics:
+
+3.1 Competitor Intelligence Gathering
+  AI systems must not assist employees in harvesting non-public information about
+  competitors, including pricing, internal org structures, or roadmaps obtained
+  through improper means.
+
+3.2 Legal Advice
+  AI systems must not provide legal opinions, advice on pending litigation, or
+  interpretation of contracts. Employees must consult ACME Legal.
+
+3.3 Financial Investment Recommendations
+  AI systems must not provide personal investment advice, stock recommendations,
+  or guidance on trading ACME securities. This could constitute securities fraud.
+
+3.4 Harassment and Discriminatory Content
+  AI systems must not generate content that demeans individuals based on race,
+  gender, religion, sexual orientation, national origin, disability, or age.
+
+3.5 Violence and Threatening Content
+  AI systems must never generate threats, incitement to violence, or content
+  that could be used to harm individuals.
+
+3.6 Credentials and Secrets Disclosure
+  AI systems must never output AWS credentials, API keys, passwords, or any
+  authentication secret, even if such data appears in context.
+
+─────────────────────────────────────────────────────────
+4. PROHIBITED PHRASES
+─────────────────────────────────────────────────────────
+
+The following codewords relate to unannounced products and must not appear in
+AI-generated output or user inputs processed by AI systems:
+
+  - Project Nighthawk
+  - Operation Stardust
+  - Codename Polaris
+
+Profanity and hate speech are strictly prohibited in all AI interactions.
+
+─────────────────────────────────────────────────────────
+5. ADVERSARIAL INPUT PROTECTION
+─────────────────────────────────────────────────────────
+
+ACME operates a zero-tolerance policy for prompt injection attacks. AI systems
+must be configured to detect and block attempts to override instructions,
+exfiltrate data, or bypass safety controls via adversarial inputs. This includes
+direct injection, indirect injection via documents, role-play jailbreaks, and
+encoding-based obfuscation attacks.
+
+─────────────────────────────────────────────────────────
+6. FACTUAL ACCURACY REQUIREMENTS
+─────────────────────────────────────────────────────────
+
+AI systems used in customer-facing contexts must only produce responses grounded
+in the provided knowledge base. Responses that are not grounded in retrieved
+source material must be blocked. Required grounding threshold: 0.75.
+Required relevance threshold: 0.70.
+
+─────────────────────────────────────────────────────────
+7. INCIDENT REPORTING
+─────────────────────────────────────────────────────────
+
+Any suspected data breach, policy violation, or AI safety incident must be
+reported to security@acme.example within 24 hours.
+
+─────────────────────────────────────────────────────────
+8. COMPLIANCE
+─────────────────────────────────────────────────────────
+
+This policy aligns with: SOC 2 Type II, ISO 27001, GDPR, HIPAA (for health
+data processors), and NIST AI RMF.
+
+END OF POLICY

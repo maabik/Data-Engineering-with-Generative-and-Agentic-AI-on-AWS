@@ -1,0 +1,233 @@
+{
+  "TemplateId": "bedrock-audit-trail-dashboard",
+  "Name": "Bedrock Governance Audit Trail",
+  "Description": "Cost-per-tenant, top users, PII detection rate, latency P50/P95/P99, jailbreak detections, guardrail trigger rates",
+  "SourceEntity": {
+    "SourceAnalysis": {
+      "Arn": "REPLACE_WITH_ANALYSIS_ARN",
+      "DataSetReferences": [
+        {
+          "DataSetPlaceholder": "bedrock_invocations",
+          "DataSetArn": "REPLACE_WITH_DATASET_ARN"
+        }
+      ]
+    }
+  },
+  "Sheets": [
+    {
+      "SheetId": "overview",
+      "Name": "Overview",
+      "Visuals": [
+        {
+          "VisualId": "kpi_total_invocations",
+          "Type": "KPIVisual",
+          "Title": "Total Invocations (Last 30d)",
+          "Metric": { "Field": "request_id", "Aggregation": "COUNT" },
+          "ComparisonMethod": "PREVIOUS_PERIOD"
+        },
+        {
+          "VisualId": "kpi_total_cost_usd",
+          "Type": "KPIVisual",
+          "Title": "Estimated Cost USD (Last 30d)",
+          "Description": "Approximate: input_tokens*$3/1M + output_tokens*$15/1M (Claude 3 Sonnet rates)",
+          "Metric": {
+            "Field": "approx_total_cost_usd",
+            "Aggregation": "SUM"
+          },
+          "ComparisonMethod": "PREVIOUS_PERIOD"
+        },
+        {
+          "VisualId": "kpi_pii_rate",
+          "Type": "KPIVisual",
+          "Title": "PII Detection Rate %",
+          "Metric": { "Field": "pii_detected", "Aggregation": "PERCENT_OF_TOTAL" }
+        },
+        {
+          "VisualId": "kpi_guardrail_block_rate",
+          "Type": "KPIVisual",
+          "Title": "Guardrail Block Rate %",
+          "Metric": { "Field": "guardrail_action_blocked", "Aggregation": "PERCENT_OF_TOTAL" }
+        },
+        {
+          "VisualId": "line_invocations_over_time",
+          "Type": "LineChartVisual",
+          "Title": "Invocations Over Time",
+          "XAxis": { "Field": "date", "DateGranularity": "DAY" },
+          "YAxis": { "Field": "request_id", "Aggregation": "COUNT" },
+          "Color": { "Field": "model_family" }
+        },
+        {
+          "VisualId": "bar_cost_per_tenant",
+          "Type": "BarChartVisual",
+          "Title": "Estimated Cost by Tenant (Last 30d)",
+          "Category": { "Field": "tenant_id" },
+          "Value": { "Field": "approx_total_cost_usd", "Aggregation": "SUM" },
+          "SortOrder": "DESC",
+          "MaxBars": 20
+        }
+      ]
+    },
+    {
+      "SheetId": "security",
+      "Name": "Security & Compliance",
+      "Visuals": [
+        {
+          "VisualId": "line_pii_detections",
+          "Type": "LineChartVisual",
+          "Title": "PII Detections Over Time",
+          "XAxis": { "Field": "date", "DateGranularity": "DAY" },
+          "YAxis": { "Field": "pii_detected", "Aggregation": "COUNT_DISTINCT" }
+        },
+        {
+          "VisualId": "pie_pii_entity_types",
+          "Type": "PieChartVisual",
+          "Title": "PII Entity Type Distribution",
+          "Category": { "Field": "pii_entity_types" },
+          "Value": { "Field": "request_id", "Aggregation": "COUNT" }
+        },
+        {
+          "VisualId": "bar_guardrail_topics",
+          "Type": "BarChartVisual",
+          "Title": "Top Guardrail Topics Triggered",
+          "Category": { "Field": "guardrail_topics_triggered" },
+          "Value": { "Field": "request_id", "Aggregation": "COUNT" },
+          "SortOrder": "DESC"
+        },
+        {
+          "VisualId": "line_injections",
+          "Type": "LineChartVisual",
+          "Title": "Prompt Injection / Jailbreak Detections",
+          "XAxis": { "Field": "date", "DateGranularity": "DAY" },
+          "YAxis": { "Field": "injection_detected", "Aggregation": "COUNT" },
+          "Color": { "Field": "tenant_id" }
+        },
+        {
+          "VisualId": "table_recent_blocks",
+          "Type": "TableVisual",
+          "Title": "Recent Guardrail Blocks (Last 7d)",
+          "Columns": [
+            "event_time", "user_id", "tenant_id", "model_id",
+            "guardrail_action", "injection_detected",
+            "guardrail_topics_triggered", "input_text_redacted"
+          ],
+          "Filter": {
+            "Field": "guardrail_action",
+            "Operator": "IN",
+            "Values": ["BLOCKED", "INTERVENED"]
+          },
+          "SortBy": { "Field": "event_time", "Direction": "DESC" }
+        }
+      ]
+    },
+    {
+      "SheetId": "latency",
+      "Name": "Latency & Performance",
+      "Visuals": [
+        {
+          "VisualId": "line_latency_p50_p95_p99",
+          "Type": "LineChartVisual",
+          "Title": "Latency P50 / P95 / P99 Over Time",
+          "XAxis": { "Field": "date", "DateGranularity": "DAY" },
+          "YAxis": [
+            { "Field": "p50_latency_ms", "Aggregation": "PERCENTILE", "Percentile": 50 },
+            { "Field": "p95_latency_ms", "Aggregation": "PERCENTILE", "Percentile": 95 },
+            { "Field": "p99_latency_ms", "Aggregation": "PERCENTILE", "Percentile": 99 }
+          ],
+          "Color": { "Field": "model_id" }
+        },
+        {
+          "VisualId": "bar_latency_by_model",
+          "Type": "BarChartVisual",
+          "Title": "Avg Latency by Model (Last 7d)",
+          "Category": { "Field": "model_id" },
+          "Value": { "Field": "latency_ms", "Aggregation": "AVERAGE" },
+          "SortOrder": "DESC"
+        },
+        {
+          "VisualId": "scatter_tokens_vs_latency",
+          "Type": "ScatterPlotVisual",
+          "Title": "Output Tokens vs. Latency",
+          "XAxis": { "Field": "output_tokens", "Aggregation": "SUM" },
+          "YAxis": { "Field": "latency_ms", "Aggregation": "AVERAGE" },
+          "Color": { "Field": "model_family" }
+        },
+        {
+          "VisualId": "kpi_error_rate",
+          "Type": "KPIVisual",
+          "Title": "Model Error Rate %",
+          "Metric": { "Field": "error_code_nonempty", "Aggregation": "PERCENT_OF_TOTAL" }
+        }
+      ]
+    },
+    {
+      "SheetId": "users",
+      "Name": "Users & Tenants",
+      "Visuals": [
+        {
+          "VisualId": "table_top_users",
+          "Type": "TableVisual",
+          "Title": "Top 25 Users by Token Consumption (Last 7d)",
+          "Columns": [
+            "user_id", "tenant_id", "invocation_count",
+            "total_tokens", "approx_total_cost_usd",
+            "pii_events", "injection_events"
+          ],
+          "SortBy": { "Field": "total_tokens", "Direction": "DESC" }
+        },
+        {
+          "VisualId": "heat_map_user_activity",
+          "Type": "HeatMapVisual",
+          "Title": "User Activity Heatmap (day × hour)",
+          "Rows": { "Field": "date", "DateGranularity": "DAY" },
+          "Columns": { "Field": "event_time", "DateGranularity": "HOUR" },
+          "Values": { "Field": "request_id", "Aggregation": "COUNT" }
+        },
+        {
+          "VisualId": "bar_cost_trend_by_tenant",
+          "Type": "BarChartVisual",
+          "Title": "Daily Cost Trend by Tenant",
+          "Category": { "Field": "date", "DateGranularity": "DAY" },
+          "Value": { "Field": "approx_total_cost_usd", "Aggregation": "SUM" },
+          "Color": { "Field": "tenant_id" },
+          "ChartSubtype": "STACKED"
+        }
+      ]
+    }
+  ],
+  "CalculatedFields": [
+    {
+      "Name": "approx_total_cost_usd",
+      "Expression": "({input_tokens} / 1000000.0 * 3.00) + ({output_tokens} / 1000000.0 * 15.00)"
+    },
+    {
+      "Name": "guardrail_action_blocked",
+      "Expression": "ifelse({guardrail_action} = 'BLOCKED', 1, 0)"
+    },
+    {
+      "Name": "error_code_nonempty",
+      "Expression": "ifelse(strlen({error_code}) > 0, 1, 0)"
+    }
+  ],
+  "Filters": [
+    {
+      "FilterId": "date_range_filter",
+      "Column": "date",
+      "Type": "RelativeDatesFilter",
+      "RelativeDateType": "LAST",
+      "TimeGranularity": "DAY",
+      "RelativeDateValue": 30
+    },
+    {
+      "FilterId": "tenant_filter",
+      "Column": "tenant_id",
+      "Type": "CategoryFilter",
+      "SelectAllOptions": "FILTER_ALL_VALUES"
+    },
+    {
+      "FilterId": "model_filter",
+      "Column": "model_id",
+      "Type": "CategoryFilter",
+      "SelectAllOptions": "FILTER_ALL_VALUES"
+    }
+  ]
+}

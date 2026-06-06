@@ -1,0 +1,36 @@
+{
+  "invoice_number": "INV-2024-00428",
+  "invoice_date": "2024-09-12",
+  "due_date": "2024-10-12",
+  "purchase_order": "PO-77531",
+  "vendor_name": "Aurora Cloud Solutions, LLC",
+  "vendor_address": "120 Market Street, Suite 800, San Francisco, CA 94105",
+  "vendor_tax_id": "EIN 84-2937104",
+  "bill_to_name": "Northwind Logistics Inc.",
+  "bill_to_address": "950 Industrial Way, Reno, NV 89506",
+  "currency": "USD",
+  "subtotal": 18750.0,
+  "tax_total": 1640.63,
+  "total_due": 20390.63,
+  "payment_terms": "Net 30",
+  "line_items": [
+    {
+      "description": "Cloud Architecture Review (40 hrs)",
+      "quantity": 40,
+      "unit_price": 250.0,
+      "amount": 10000.0
+    },
+    {
+      "description": "Data pipeline implementation (25 hrs)",
+      "quantity": 25,
+      "unit_price": 275.0,
+      "amount": 6875.0
+    },
+    {
+      "description": "Knowledge transfer workshop",
+      "quantity": 1,
+      "unit_price": 1875.0,
+      "amount": 1875.0
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "StartAt": "RawIngestJob",
+  "States": {
+    "RawIngestJob": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName.$": "$.rawIngestJobName"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "ThrottlingException",
+            "ServiceUnavailableException"
+          ],
+          "IntervalSeconds": 30,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "RawIngestJobFailed"
+        }
+      ],
+      "Next": "TransformJob"
+    },
+    "TransformJob": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName.$": "$.transformJobName"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "ThrottlingException",
+            "ServiceUnavailableException"
+          ],
+          "IntervalSeconds": 30,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "TransformJobFailed"
+        }
+      ],
+      "Next": "PublishJob"
+    },
+    "PublishJob": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName.$": "$.publishJobName"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "ThrottlingException",
+            "ServiceUnavailableException"
+          ],
+          "IntervalSeconds": 30,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "PublishJobFailed"
+        }
+      ],
+      "Next": "Success"
+    },
+    "Success": {
+      "Type": "Succeed"
+    },
+    "RawIngestJobFailed": {
+      "Type": "Fail",
+      "Error": "RawIngestJobError",
+      "Cause": "Raw ingest job failed after retries"
+    },
+    "TransformJobFailed": {
+      "Type": "Fail",
+      "Error": "TransformJobError",
+      "Cause": "Transform job failed after retries"
+    },
+    "PublishJobFailed": {
+      "Type": "Fail",
+      "Error": "PublishJobError",
+      "Cause": "Publish job failed after retries"
+    }
+  }
+}

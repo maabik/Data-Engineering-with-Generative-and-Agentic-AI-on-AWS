@@ -1,0 +1,114 @@
+{
+  "class": "CommercialLeaseAbstract",
+  "description": "Commercial real-estate lease abstract. Captures parties, premises, term, rent schedule, options, and key clauses.",
+  "definitions": {
+    "RENT_STEP": {
+      "properties": {
+        "period_start": {
+          "type": "string",
+          "inferenceType": "explicit",
+          "instruction": "Start date of this rent step"
+        },
+        "period_end": {
+          "type": "string",
+          "inferenceType": "explicit",
+          "instruction": "End date of this rent step"
+        },
+        "monthly_rent": {
+          "type": "number",
+          "inferenceType": "explicit",
+          "instruction": "Base monthly rent during this step"
+        },
+        "annual_rent": {
+          "type": "number",
+          "inferenceType": "explicit",
+          "instruction": "Annualized base rent during this step"
+        }
+      }
+    }
+  },
+  "properties": {
+    "landlord_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Legal name of the landlord / lessor"
+    },
+    "tenant_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Legal name of the tenant / lessee"
+    },
+    "guarantor_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Name of any lease guarantor, blank if none"
+    },
+    "premises_address": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Street address of the leased premises"
+    },
+    "rentable_square_feet": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Rentable square footage of the premises"
+    },
+    "use_clause": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Permitted use of the premises"
+    },
+    "lease_type": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Gross, Modified Gross, NNN, or other"
+    },
+    "lease_commencement_date": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Lease commencement date"
+    },
+    "lease_expiration_date": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Lease expiration date"
+    },
+    "term_months": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Total term in months"
+    },
+    "security_deposit": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Security deposit amount"
+    },
+    "renewal_options": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Description of renewal / extension options"
+    },
+    "early_termination": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Early termination rights and fees, if any"
+    },
+    "operating_expense_recovery": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "How operating expenses / CAM are passed through"
+    },
+    "tenant_improvement_allowance": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Tenant improvement allowance, if any"
+    },
+    "rent_schedule": {
+      "type": "array",
+      "instruction": "Stepped base-rent schedule from commencement through expiration",
+      "items": {
+        "$ref": "#/definitions/RENT_STEP"
+      }
+    }
+  }
+}

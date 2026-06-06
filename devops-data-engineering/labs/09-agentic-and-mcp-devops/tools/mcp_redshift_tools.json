@@ -1,0 +1,49 @@
+{
+  "tools": [
+    {
+      "name": "list_tables",
+      "description": "Lists tables in the curated schema. Call once per session.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "describe_table",
+      "description": "Returns column names and types for a table. Call before writing a query against a new table.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "table": { "type": "string", "description": "Table name from list_tables." }
+        },
+        "required": ["table"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "evaluate_sql",
+      "description": "Pre-flight evaluator for SQL. Returns OK or a list of issues. ALWAYS call before execute_redshift_query for any non-trivial SELECT.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "sql": { "type": "string" }
+        },
+        "required": ["sql"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "execute_redshift_query",
+      "description": "Executes a SELECT against the curated Redshift cluster. Read-only — refuses non-SELECT statements. Rows are returned as JSON.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "sql": { "type": "string", "description": "Read-only SELECT." }
+        },
+        "required": ["sql"],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+sku,product_name,category,unit_cost,list_price,active,launched_on
+SKU-CHOC-200,Dark Chocolate Bar 200g,confectionery,3.50,12.50,true,2022-09-01
+SKU-CHOC-500,Premium Cocoa Block 500g,confectionery,9.00,29.00,true,2023-02-15
+SKU-COCOA-1KG,Raw Cocoa Beans 1kg,raw_material,7.20,18.00,true,2021-06-20
+SKU-CHOC-100,Milk Chocolate Bar 100g,confectionery,2.10,7.50,false,2020-04-12
+SKU-CHOC-DARK-XL,Dark Chocolate XL 1kg,confectionery,18.50,55.00,true,2024-01-08

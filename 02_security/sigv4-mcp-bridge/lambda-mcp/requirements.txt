@@ -1,0 +1,3 @@
+# No runtime deps beyond the Python stdlib — keeps the deployment package
+# small and cold starts fast. If you add MCP tools that need AWS SDK calls,
+# add boto3 here (or omit and rely on the Lambda runtime's built-in boto3).

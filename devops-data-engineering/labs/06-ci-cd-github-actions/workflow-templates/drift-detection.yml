@@ -1,0 +1,40 @@
+name: drift-detection
+
+on:
+  schedule:
+    - cron: "0 13 * * *"   # daily 13:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with: { terraform_version: 1.8.5 }
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.PROD_DEPLOY_ROLE }}
+          aws-region: us-east-1
+      - id: plan
+        name: Plan with detailed exit code
+        working-directory: reference-pipeline/terraform/envs/prod
+        run: |
+          terraform init
+          set +e
+          terraform plan -detailed-exitcode -no-color -lock=false | tee plan.txt
+          echo "exit=$?" >> $GITHUB_OUTPUT
+        # 0 = no changes, 1 = error, 2 = changes
+      - name: Slack on drift
+        if: steps.plan.outputs.exit == '2'
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          plan=$(head -c 3000 reference-pipeline/terraform/envs/prod/plan.txt)
+          payload=$(jq -nc --arg t ":warning: Prod drift detected" --arg p "$plan" '{text: ($t + "\n```" + $p + "```")}')
+          curl -sS -X POST -H "Content-Type: application/json" -d "$payload" "$SLACK_WEBHOOK"

@@ -1,0 +1,61 @@
+items:
+  - from_level: 1
+    title: "Tag lake buckets and apply Intelligent-Tiering on cold prefixes"
+    impact: 4
+    effort: S
+    aws_services: [Amazon S3]
+    book_reference: "Chapter 2 — Data Security and Governance (FinOps section)"
+    why_it_matters: |
+      The cheapest, most reversible win in any lake assessment. Intelligent-
+      Tiering pays for itself in the first month for cold data.
+    steps:
+      - "Apply baseline tags (Owner, Domain, Environment) to all lake buckets."
+      - "Add Intelligent-Tiering rules on raw/ and bronze/ prefixes."
+    acceptance_criteria:
+      - "100% of lake buckets tagged; ≥50% have lifecycle rules."
+
+  - from_level: 2
+    title: "Activate cost allocation tags and apply DataProduct/Owner tags"
+    impact: 5
+    effort: S
+    aws_services: [AWS Cost Explorer, Amazon S3]
+    book_reference: "Chapter 2 — Data Security and Governance (FinOps section)"
+    why_it_matters: |
+      You cannot do chargeback without active cost allocation tags. The
+      activation is free but takes ~24h to propagate.
+    steps:
+      - "Activate DataProduct, BusinessUnit, Owner, CostCenter in Cost Explorer."
+      - "Backfill the tags via tag-policy and aws-tagging-api."
+    acceptance_criteria:
+      - "≥3 cost allocation tags active and propagating."
+
+  - from_level: 3
+    title: "Roll lifecycle rules to ≥70% of lake buckets with Glacier-IR transitions"
+    impact: 4
+    effort: M
+    aws_services: [Amazon S3, Amazon S3 Storage Lens]
+    book_reference: "Chapter 2 — Data Security and Governance (FinOps section)"
+    why_it_matters: |
+      Glacier-IR is the right tier for rarely-read but must-retain data; the
+      math is usually 60-80% cheaper than Standard.
+    steps:
+      - "Use Storage Lens to find cold prefixes."
+      - "Add age-based transitions to Glacier-IR or Deep Archive."
+    acceptance_criteria:
+      - "≥70% of lake buckets have lifecycle rules with cold-tier transitions."
+
+  - from_level: 4
+    title: "Subscribe to Cost Anomaly Detection on lake spend; build chargeback dashboard"
+    impact: 4
+    effort: M
+    aws_services: [AWS Cost Explorer, Amazon QuickSight]
+    book_reference: "Chapter 2 — Data Security and Governance (FinOps section)"
+    why_it_matters: |
+      Detection without alerting is just data. Anomaly detection on tagged
+      spend is the difference between a $5k surprise and a $50k surprise.
+    steps:
+      - "Create a CE anomaly monitor scoped to lake-related services."
+      - "Subscribe to Slack/email; route to FinOps."
+      - "Build a chargeback view in QuickSight by DataProduct tag."
+    acceptance_criteria:
+      - "Anomaly subscription active; chargeback dashboard live."

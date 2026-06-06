@@ -1,0 +1,85 @@
+name: plan-and-policy
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+      tf_dir:
+        type: string
+        required: true
+      tf_workspace:
+        type: string
+        required: false
+        default: ""
+    secrets:
+      deploy_role:
+        required: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with: { terraform_version: 1.8.5 }
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.deploy_role }}
+          aws-region: us-east-1
+
+      - name: Terraform plan
+        id: plan
+        working-directory: ${{ inputs.tf_dir }}
+        env:
+          TF_WORKSPACE: ${{ inputs.tf_workspace }}
+          TF_VAR_owner: pr-${{ github.event.pull_request.number || 'staging' }}
+        run: |
+          terraform init
+          if [ -n "$TF_WORKSPACE" ]; then
+            terraform workspace new "$TF_WORKSPACE" 2>/dev/null || terraform workspace select "$TF_WORKSPACE"
+          fi
+          terraform plan -no-color -out plan.tfplan | tee plan.txt
+          terraform show -json plan.tfplan > plan.json
+
+      - name: Conftest policy gate
+        run: |
+          curl -sSL -o conftest.tgz https://github.com/open-policy-agent/conftest/releases/download/v0.55.0/conftest_0.55.0_Linux_x86_64.tar.gz
+          tar -xzf conftest.tgz
+          ./conftest test --policy labs/04-policy-as-code/policies ${{ inputs.tf_dir }}/plan.json
+
+      - name: Checkov gate
+        run: |
+          pipx install checkov
+          checkov -d reference-pipeline/terraform/ --config-file labs/04-policy-as-code/.checkov.yaml
+
+      - name: Comment plan on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('${{ inputs.tf_dir }}/plan.txt', 'utf8');
+            const truncated = plan.length > 60000 ? plan.slice(0, 60000) + '\n... (truncated; see artifact)' : plan;
+            const body = '<details><summary>Terraform plan — ${{ inputs.environment }}</summary>\n\n```\n' + truncated + '\n```\n</details>';
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plan-${{ inputs.environment }}
+          path: ${{ inputs.tf_dir }}/plan.tfplan

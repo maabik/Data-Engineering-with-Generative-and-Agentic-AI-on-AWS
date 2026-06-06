@@ -1,0 +1,23 @@
+26/05/20 02:16:45 INFO SparkContext: Running Spark version 3.5.0
+26/05/20 02:16:46 INFO SparkContext: Submitted application: SalesETL.transform_orders
+26/05/20 02:16:50 INFO HadoopFsRelation: Listing s3://dpa-123456789012-us-west-2/landing/orders/ on driver
+26/05/20 02:18:11 INFO CodeGenerator: Code generated in 142.4 ms
+26/05/20 02:19:40 INFO DAGScheduler: ResultStage 4 (parquet at OrdersTransformer.scala:88) failed in 47.812 s
+26/05/20 02:19:40 ERROR TaskSetManager: Task 17 in stage 4.0 failed 4 times; aborting job
+26/05/20 02:19:40 INFO DAGScheduler: Job 4 failed: parquet at OrdersTransformer.scala:88, took 47.991 s
+26/05/20 02:19:40 ERROR FileFormatWriter: Aborting job 5e6a6f1d-93cf-4a04-a4e0-32a0bb9fd2a1.
+org.apache.spark.SparkException: Job aborted due to stage failure: Task 17 in stage 4.0 failed 4 times, most recent failure: Lost task 17.3 in stage 4.0 (TID 312) (ip-10-0-23-77.us-west-2.compute.internal executor 6): ExecutorLostFailure (executor 6 exited caused by one of the running tasks) Reason: Container killed by YARN for exceeding memory limits.  10.4 GB of 10 GB physical memory used. Consider boosting spark.executor.memoryOverhead or spark.executor.memory.
+        at org.apache.spark.scheduler.DAGScheduler.failJobAndIndependentStages(DAGScheduler.scala:2731)
+        at org.apache.spark.scheduler.DAGScheduler.$anonfun$abortStage$2(DAGScheduler.scala:2667)
+        at scala.collection.immutable.List.foreach(List.scala:431)
+        at org.apache.spark.scheduler.DAGScheduler.abortStage(DAGScheduler.scala:2667)
+        at org.apache.spark.scheduler.DAGScheduler.$anonfun$handleTaskSetFailed$1(DAGScheduler.scala:1217)
+        at scala.Option.foreach(Option.scala:407)
+26/05/20 02:19:40 ERROR Driver: Caused by: java.lang.OutOfMemoryError: Java heap space
+        at org.apache.spark.unsafe.Platform.allocateMemory(Platform.java:142)
+        at org.apache.spark.memory.MemoryAllocator$1.allocate(MemoryAllocator.java:35)
+        at org.apache.spark.memory.MemoryConsumer.allocateArray(MemoryConsumer.java:99)
+        at org.apache.spark.shuffle.sort.ShuffleExternalSorter.growPointerArrayIfNecessary(ShuffleExternalSorter.java:368)
+26/05/20 02:32:11 INFO SparkContext: Successfully stopped SparkContext
+26/05/20 02:32:11 INFO ShutdownHookManager: Deleting directory /tmp/spark-78cab9d6-0cba-4f2f-8e4d-db1a5d1b8bce
+26/05/20 02:32:11 ERROR ApplicationMaster: User application exited with status 1

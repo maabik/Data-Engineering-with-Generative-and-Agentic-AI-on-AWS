@@ -1,0 +1,109 @@
+{
+  "class": "EnterpriseInvoice",
+  "description": "Commercial invoice issued by a vendor to a customer. Captures header, parties, totals, and line-item table.",
+  "definitions": {
+    "LINEITEM": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "inferenceType": "explicit",
+          "instruction": "Full description of the product or service line"
+        },
+        "quantity": {
+          "type": "number",
+          "inferenceType": "explicit",
+          "instruction": "Number of units billed for this line"
+        },
+        "unit_price": {
+          "type": "number",
+          "inferenceType": "explicit",
+          "instruction": "Per-unit price in the invoice currency"
+        },
+        "amount": {
+          "type": "number",
+          "inferenceType": "explicit",
+          "instruction": "Extended amount for the line (quantity * unit_price)"
+        }
+      }
+    }
+  },
+  "properties": {
+    "invoice_number": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Vendor-assigned invoice identifier"
+    },
+    "invoice_date": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Date the invoice was issued, ISO 8601 if possible"
+    },
+    "due_date": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Date payment is due"
+    },
+    "purchase_order": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Customer purchase order number referenced on the invoice"
+    },
+    "vendor_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Legal name of the vendor / seller"
+    },
+    "vendor_address": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Mailing address of the vendor"
+    },
+    "vendor_tax_id": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Vendor tax / VAT / EIN identifier if shown"
+    },
+    "bill_to_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Name of the party being billed"
+    },
+    "bill_to_address": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Bill-to mailing address"
+    },
+    "currency": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Three-letter currency code (USD, EUR, etc.). Infer from currency symbols if not explicit."
+    },
+    "subtotal": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Sum of line items before tax and discounts"
+    },
+    "tax_total": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Total tax amount on the invoice"
+    },
+    "total_due": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Final amount the customer owes"
+    },
+    "payment_terms": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Payment terms text (e.g. Net 30)"
+    },
+    "line_items": {
+      "type": "array",
+      "instruction": "All billable lines on the invoice",
+      "items": {
+        "$ref": "#/definitions/LINEITEM"
+      }
+    }
+  }
+}

@@ -1,0 +1,79 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  SigV4 → MCP bridge: Lambda-hosted MCP server behind a Function URL with
+  AWS_IAM auth, plus a caller role scoped to invoke it.
+
+Parameters:
+  StackPrefix:
+    Type: String
+    Default: sigv4-mcp-bridge
+    AllowedPattern: '^[a-z][a-z0-9-]{2,40}$'
+  LambdaCodeBucket:
+    Type: String
+    Description: S3 bucket staging the packaged Lambda zip.
+  LambdaCodeKey:
+    Type: String
+    Default: mcp_app.zip
+
+Resources:
+  McpFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${StackPrefix}-mcp
+      Runtime: python3.12
+      Handler: mcp_app.handler
+      MemorySize: 512
+      Timeout: 30
+      CodeUri:
+        Bucket: !Ref LambdaCodeBucket
+        Key: !Ref LambdaCodeKey
+      Architectures: [arm64]
+
+  McpFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !GetAtt McpFunction.Arn
+      AuthType: AWS_IAM
+      InvokeMode: BUFFERED
+
+  McpFunctionUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref McpFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: !Ref AWS::AccountId
+      FunctionUrlAuthType: AWS_IAM
+
+  CallerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${StackPrefix}-caller
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:root
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: invoke-mcp
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunctionUrl
+                Resource: !GetAtt McpFunction.Arn
+                Condition:
+                  StringEquals:
+                    lambda:FunctionUrlAuthType: AWS_IAM
+
+Outputs:
+  FunctionUrl:
+    Value: !GetAtt McpFunctionUrl.FunctionUrl
+  FunctionArn:
+    Value: !GetAtt McpFunction.Arn
+  CallerRoleArn:
+    Value: !GetAtt CallerRole.Arn
+  Region:
+    Value: !Ref AWS::Region

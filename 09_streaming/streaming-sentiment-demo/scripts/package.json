@@ -1,0 +1,12 @@
+{
+  "name": "social-media-producer",
+  "version": "1.0.0",
+  "description": "Script to simulate social media posts and send them to Kinesis",
+  "main": "social-media-producer.js",
+  "dependencies": {
+    "@aws-sdk/client-kinesis": "^3.400.0"
+  },
+  "scripts": {
+    "start": "node social-media-producer.js"
+  }
+}

@@ -1,0 +1,281 @@
+{
+    "title": "Sales Performance Analytics Story",
+    "subtitle": "Comprehensive insights into sales performance, trends, and opportunities",
+    "generated_at": "2025-07-27T21:00:00Z",
+    "executive_summary": {
+        "overview": "This story provides a comprehensive analysis of sales performance across multiple dimensions including time, geography, products, and customer segments.",
+        "key_findings": [
+            "Sales performance shows strong growth patterns with seasonal variations",
+            "Regional distribution reveals opportunities for market expansion",
+            "Product category performance indicates areas for optimization",
+            "Customer segmentation shows distinct purchasing behaviors"
+        ]
+    },
+    "chapters": [
+        {
+            "chapter_id": 1,
+            "title": "Revenue Performance Overview",
+            "description": "Analysis of overall revenue trends and key performance indicators",
+            "insights": [
+                {
+                    "type": "metric",
+                    "title": "Total Revenue Achievement",
+                    "description": "Overall sales performance against targets and historical benchmarks",
+                    "sample_queries": [
+                        "What are our total sales this year?",
+                        "How does this year's revenue compare to last year?",
+                        "What's our monthly revenue trend?",
+                        "Show me revenue by quarter"
+                    ],
+                    "key_metrics": [
+                        "Total Sales Amount",
+                        "Year-over-Year Growth",
+                        "Monthly Growth Rate",
+                        "Revenue per Transaction"
+                    ]
+                },
+                {
+                    "type": "trend",
+                    "title": "Revenue Trend Analysis",
+                    "description": "Temporal patterns in sales performance revealing seasonal and cyclical trends",
+                    "sample_queries": [
+                        "Show me sales trends over the last 12 months",
+                        "What are our peak sales months?",
+                        "How do sales vary by season?",
+                        "What's our month-over-month growth pattern?"
+                    ],
+                    "insights": [
+                        "Identify peak performance periods",
+                        "Understand seasonal variations",
+                        "Forecast future performance",
+                        "Optimize resource allocation"
+                    ]
+                }
+            ]
+        },
+        {
+            "chapter_id": 2,
+            "title": "Geographic Performance Analysis",
+            "description": "Regional sales distribution and market penetration insights",
+            "insights": [
+                {
+                    "type": "geographic",
+                    "title": "Regional Sales Distribution",
+                    "description": "Analysis of sales performance across different geographic regions",
+                    "sample_queries": [
+                        "Which region has the highest sales?",
+                        "Show me sales by country",
+                        "Compare regional performance",
+                        "What cities are our top performers?",
+                        "Which regions are growing fastest?"
+                    ],
+                    "key_findings": [
+                        "Top performing regions drive majority of revenue",
+                        "Emerging markets show growth potential",
+                        "Urban vs rural performance patterns",
+                        "Regional customer preferences vary"
+                    ]
+                },
+                {
+                    "type": "opportunity",
+                    "title": "Market Expansion Opportunities",
+                    "description": "Identification of underperforming regions with growth potential",
+                    "sample_queries": [
+                        "Which regions have the lowest sales?",
+                        "Show me untapped market opportunities",
+                        "Where should we focus expansion efforts?",
+                        "What regions have declining performance?"
+                    ],
+                    "recommendations": [
+                        "Increase marketing in underperforming regions",
+                        "Analyze regional customer preferences",
+                        "Optimize distribution channels",
+                        "Develop region-specific strategies"
+                    ]
+                }
+            ]
+        },
+        {
+            "chapter_id": 3,
+            "title": "Product Performance Deep Dive",
+            "description": "Comprehensive analysis of product categories, individual products, and profitability",
+            "insights": [
+                {
+                    "type": "product",
+                    "title": "Category Performance Analysis",
+                    "description": "Sales performance across different product categories",
+                    "sample_queries": [
+                        "Show me sales by category",
+                        "Which categories are most profitable?",
+                        "What are our top selling product categories?",
+                        "How do categories compare in terms of volume vs value?",
+                        "Which categories have the highest margins?"
+                    ],
+                    "metrics": [
+                        "Revenue by Category",
+                        "Profit Margin by Category",
+                        "Units Sold by Category",
+                        "Average Order Value by Category"
+                    ]
+                },
+                {
+                    "type": "product",
+                    "title": "Individual Product Performance",
+                    "description": "Analysis of top and bottom performing individual products",
+                    "sample_queries": [
+                        "What are our top selling products?",
+                        "Which products are most profitable?",
+                        "Show me products with declining sales",
+                        "What products have the highest discount rates?",
+                        "Which products should we promote more?"
+                    ],
+                    "insights": [
+                        "Star products driving revenue",
+                        "Products requiring attention",
+                        "Pricing optimization opportunities",
+                        "Inventory management insights"
+                    ]
+                }
+            ]
+        },
+        {
+            "chapter_id": 4,
+            "title": "Customer Analytics & Segmentation",
+            "description": "Customer behavior analysis and segmentation insights",
+            "insights": [
+                {
+                    "type": "customer",
+                    "title": "Customer Value Analysis",
+                    "description": "Analysis of customer purchasing patterns and value contribution",
+                    "sample_queries": [
+                        "Who are our top customers by revenue?",
+                        "What's our average order value?",
+                        "Show me customer distribution by region",
+                        "Which customers buy most frequently?",
+                        "What's our customer lifetime value?"
+                    ],
+                    "segments": [
+                        "High-value customers (top 20%)",
+                        "Regular customers (middle 60%)",
+                        "Occasional customers (bottom 20%)",
+                        "New vs returning customers"
+                    ]
+                },
+                {
+                    "type": "behavior",
+                    "title": "Purchase Behavior Patterns",
+                    "description": "Understanding how customers interact with products and make purchases",
+                    "sample_queries": [
+                        "What's the average transaction size?",
+                        "How often do customers make repeat purchases?",
+                        "What products do customers buy together?",
+                        "Which customers are most price sensitive?"
+                    ],
+                    "patterns": [
+                        "Seasonal purchasing behavior",
+                        "Product affinity patterns",
+                        "Price sensitivity analysis",
+                        "Channel preferences"
+                    ]
+                }
+            ]
+        },
+        {
+            "chapter_id": 5,
+            "title": "Sales Team Performance",
+            "description": "Analysis of sales representative performance and effectiveness",
+            "insights": [
+                {
+                    "type": "performance",
+                    "title": "Sales Rep Effectiveness",
+                    "description": "Individual and team performance metrics for sales representatives",
+                    "sample_queries": [
+                        "Which sales reps are performing best?",
+                        "Show me sales by sales representative",
+                        "What's the average deal size by rep?",
+                        "Which reps have the highest conversion rates?",
+                        "How do regional sales teams compare?"
+                    ],
+                    "metrics": [
+                        "Revenue per Sales Rep",
+                        "Number of Deals Closed",
+                        "Average Deal Size",
+                        "Customer Satisfaction Scores"
+                    ]
+                }
+            ]
+        },
+        {
+            "chapter_id": 6,
+            "title": "Profitability & Margin Analysis",
+            "description": "Deep dive into profit margins and cost optimization opportunities",
+            "insights": [
+                {
+                    "type": "profitability",
+                    "title": "Margin Analysis by Dimension",
+                    "description": "Profit margin analysis across products, regions, and customer segments",
+                    "sample_queries": [
+                        "What's our profit margin by category?",
+                        "Which regions are most profitable?",
+                        "Show me profit trends over time",
+                        "What products have the highest margins?",
+                        "How do discounts affect profitability?"
+                    ],
+                    "focus_areas": [
+                        "High-margin product promotion",
+                        "Low-margin product optimization",
+                        "Regional profitability differences",
+                        "Discount impact analysis"
+                    ]
+                }
+            ]
+        }
+    ],
+    "recommendations": {
+        "immediate_actions": [
+            {
+                "priority": "High",
+                "action": "Focus marketing efforts on top-performing regions",
+                "rationale": "Maximize ROI by investing in proven markets",
+                "expected_impact": "15-20% increase in regional sales"
+            },
+            {
+                "priority": "High", 
+                "action": "Optimize product mix based on profitability analysis",
+                "rationale": "Improve overall margins by promoting high-profit products",
+                "expected_impact": "5-10% improvement in profit margins"
+            },
+            {
+                "priority": "Medium",
+                "action": "Develop customer retention programs for high-value segments",
+                "rationale": "Increase customer lifetime value and reduce churn",
+                "expected_impact": "10-15% increase in customer retention"
+            }
+        ],
+        "strategic_initiatives": [
+            {
+                "timeframe": "3-6 months",
+                "initiative": "Expand into underperforming regions with targeted campaigns",
+                "resources_required": "Marketing budget, regional sales support",
+                "success_metrics": "Regional sales growth, market share increase"
+            },
+            {
+                "timeframe": "6-12 months",
+                "initiative": "Implement dynamic pricing based on demand patterns",
+                "resources_required": "Pricing analytics tools, training",
+                "success_metrics": "Margin improvement, competitive positioning"
+            }
+        ]
+    },
+    "appendix": {
+        "data_sources": [
+            "Sales transaction data from Redshift cluster",
+            "Product catalog information",
+            "Customer demographic data",
+            "Geographic region mappings"
+        ],
+        "methodology": "Analysis based on historical sales data with statistical modeling for trend identification and forecasting",
+        "refresh_schedule": "Story insights updated daily with latest sales data",
+        "contact_info": "For questions about this analysis, contact the Business Intelligence team"
+    }
+}

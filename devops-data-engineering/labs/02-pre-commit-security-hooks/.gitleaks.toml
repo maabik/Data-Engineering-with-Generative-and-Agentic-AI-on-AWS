@@ -1,0 +1,42 @@
+title = "Gitleaks rules for AWS data engineering"
+
+# Inherit gitleaks defaults (AWS, GCP, GitHub, Slack, Stripe, etc.) and
+# extend with rules for data-eng-specific tokens.
+[extend]
+useDefault = true
+
+[[rules]]
+id = "snowflake-account-key"
+description = "Snowflake password / private key in connection string"
+regex = '''(?i)snowflake[_-]?(password|private[_-]?key)\s*=\s*['"][^'"]{8,}['"]'''
+tags = ["secret", "snowflake"]
+
+[[rules]]
+id = "databricks-token"
+description = "Databricks personal access token"
+regex = '''dapi[a-f0-9]{32}'''
+tags = ["secret", "databricks"]
+
+[[rules]]
+id = "anthropic-key"
+description = "Anthropic API key"
+regex = '''sk-ant-[A-Za-z0-9_-]{40,}'''
+tags = ["secret", "anthropic"]
+
+[[rules]]
+id = "openai-key"
+description = "OpenAI API key"
+regex = '''sk-(proj-)?[A-Za-z0-9_-]{30,}'''
+tags = ["secret", "openai"]
+
+# Allowlists. Each entry needs a comment explaining why it's allowed.
+[allowlist]
+description = "Test fixtures and example values"
+paths = [
+  '''.*/tests/fixtures/.*''',                # synthetic test data
+  '''.*/aidlc-docs/.*''',                    # AI-DLC artifacts (not deployed)
+]
+regexes = [
+  '''AKIAIOSFODNN7EXAMPLE''',                # AWS docs example
+  '''wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY''',  # AWS docs example
+]

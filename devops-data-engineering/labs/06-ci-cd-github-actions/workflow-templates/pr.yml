@@ -1,0 +1,44 @@
+name: pr
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - uses: pre-commit/action@v3.0.1
+
+  unit-and-contract:
+    runs-on: ubuntu-latest
+    needs: pre-commit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r reference-pipeline/requirements-dev.txt
+      - run: pytest reference-pipeline/tests/unit -q
+      - run: pytest labs/05-pipeline-testing-strategy/contracts -q
+
+  plan-and-policy:
+    needs: unit-and-contract
+    uses: ./.github/workflows/plan-and-policy.yml
+    with:
+      environment: sandbox
+      tf_dir: reference-pipeline/terraform/envs/sandbox
+      tf_workspace: pr-${{ github.event.pull_request.number }}
+    secrets:
+      deploy_role: ${{ secrets.SANDBOX_DEPLOY_ROLE }}

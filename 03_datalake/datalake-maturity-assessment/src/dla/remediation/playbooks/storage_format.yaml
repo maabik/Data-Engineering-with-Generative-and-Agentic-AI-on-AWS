@@ -1,0 +1,71 @@
+items:
+  - from_level: 1
+    title: "Adopt Parquet + Hive partitioning, register in Glue Data Catalog"
+    impact: 5
+    effort: M
+    aws_services: [Amazon S3, AWS Glue]
+    book_reference: "Chapter 3 — Data Lake Design with Apache Iceberg and S3 Tables"
+    why_it_matters: |
+      A flat S3 prefix of CSV/JSON cannot be queried efficiently and gives engines
+      no way to prune. Parquet + partitioning is the floor of any modern lake.
+    steps:
+      - "Pick the top 5 datasets by query volume; convert them to Parquet."
+      - "Apply Hive-style partition keys aligned to the dominant filter predicates."
+      - "Run a Glue crawler to register them in the Data Catalog."
+    acceptance_criteria:
+      - "≥80% of inspected lake objects are Parquet/ORC."
+      - "Glue tables exist with non-empty PartitionKeys."
+
+  - from_level: 2
+    title: "Migrate top 5 tables to Apache Iceberg (or S3 Tables)"
+    impact: 5
+    effort: M
+    aws_services: [Apache Iceberg, AWS Glue, Amazon Athena, Amazon S3 Tables]
+    book_reference: "Chapter 3 — Data Lake Design with Apache Iceberg and S3 Tables"
+    why_it_matters: |
+      Without an open table format you have no ACID guarantees, no time travel,
+      and schema-evolution is a manual S3 dance. Iceberg/Delta/Hudi remove that
+      operational tax — and S3 Tables makes it managed.
+    steps:
+      - "Identify the 5 highest-write tables; review schema-evolution history."
+      - "Use CTAS or `iceberg_migrate` to clone into Iceberg format."
+      - "Repoint downstream consumers to the new table; deprecate the old one."
+    acceptance_criteria:
+      - "≥5 tables have table_type=ICEBERG (or live in S3 Tables)."
+      - "Athena `FOR VERSION AS OF` queries succeed against the new tables."
+    reference_code: "../../iceberg-time-travel-debugger/"
+
+  - from_level: 3
+    title: "Schedule Iceberg maintenance: OPTIMIZE, EXPIRE_SNAPSHOTS, REMOVE_ORPHAN_FILES"
+    impact: 4
+    effort: S
+    aws_services: [AWS Glue, Amazon EventBridge, AWS Lambda]
+    book_reference: "Chapter 3 — Data Lake Design with Apache Iceberg and S3 Tables"
+    why_it_matters: |
+      Unmaintained Iceberg tables silently grow small files and snapshots until
+      query performance and storage cost both degrade. Maintenance is the
+      difference between an Iceberg lake and an Iceberg swamp.
+    steps:
+      - "Adopt iceberg-maintenance-agent; configure thresholds."
+      - "Wire Glue scheduled triggers to invoke OPTIMIZE/EXPIRE/REMOVE_ORPHANS weekly."
+      - "Alarm on small-file ratio > 0.5."
+    acceptance_criteria:
+      - "Each Iceberg table has a scheduled maintenance run."
+      - "Orphan-file count trends down across 4 weekly runs."
+    reference_code: "../../iceberg-maintenance-agent/"
+
+  - from_level: 4
+    title: "Add materialized views and tune sort/cluster keys for hot query patterns"
+    impact: 4
+    effort: M
+    aws_services: [Amazon Athena, Apache Iceberg]
+    book_reference: "Chapter 3 — Data Lake Design with Apache Iceberg and S3 Tables"
+    why_it_matters: |
+      The last 30% of query latency comes from layout, not format. MVs and
+      Z-order/liquid clustering pay back within weeks on hot workloads.
+    steps:
+      - "Mine Athena query history for top 10 patterns."
+      - "Create MVs for the top 3 patterns; schedule refresh."
+      - "Apply sort-keys / clustering aligned to filter columns."
+    acceptance_criteria:
+      - "Top 3 query patterns drop ≥40% in p95 latency."

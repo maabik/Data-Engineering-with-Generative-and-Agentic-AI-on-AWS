@@ -1,0 +1,93 @@
+# Pre-commit hook suite for an AWS data pipeline codebase.
+# Drop at the repository root and run `pre-commit install` once.
+
+default_language_version:
+  python: python3.11
+
+repos:
+  # --- Generic hygiene --------------------------------------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=512"]
+      - id: detect-private-key
+
+  # --- Secrets ---------------------------------------------------------------
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.4
+    hooks:
+      - id: gitleaks
+        args: ["--config", ".gitleaks.toml"]
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
+        # Run on staged files only (default). Maintain the baseline with:
+        #   detect-secrets scan > .secrets.baseline
+        #   detect-secrets audit .secrets.baseline
+
+  # --- Terraform -------------------------------------------------------------
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.92.1
+    hooks:
+      - id: terraform_fmt
+      - id: terraform_validate
+      - id: terraform_tflint
+        args:
+          - --args=--config=__GIT_WORKING_DIR__/.tflint.hcl
+      - id: terraform_tfsec
+        args:
+          - --args=--minimum-severity HIGH
+
+  - repo: https://github.com/bridgecrewio/checkov
+    rev: 3.2.255
+    hooks:
+      - id: checkov
+        args: ["-d", ".", "--quiet", "--compact", "--framework", "terraform"]
+
+  # --- Python ----------------------------------------------------------------
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.0
+    hooks:
+      - id: ruff
+        args: ["--fix=false"]    # don't auto-fix; show errors instead
+      - id: ruff-format
+        args: ["--check"]
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.9
+    hooks:
+      - id: bandit
+        args: ["-c", "pyproject.toml", "-q"]
+        additional_dependencies: ["bandit[toml]"]
+
+  # --- SQL -------------------------------------------------------------------
+  - repo: https://github.com/sqlfluff/sqlfluff
+    rev: 3.0.6
+    hooks:
+      - id: sqlfluff-lint
+        # config from .sqlfluff at repo root
+
+  # --- Notebooks -------------------------------------------------------------
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.7.1
+    hooks:
+      - id: nbstripout
+        # Strips outputs from .ipynb at commit time so diffs are reviewable.
+
+  # --- Custom hooks ----------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: block-aws-account-ids
+        name: Block hardcoded AWS account IDs
+        entry: scripts/block-aws-account-ids.sh
+        language: script
+        files: \.(tf|tfvars|yaml|yml|json)$

@@ -1,0 +1,28 @@
+# Generated demo artifacts — produced by setup/run scripts at runtime.
+# Keep README.md and sample-queries.md (curated docs) tracked.
+generated-story.json
+sample-story-queries.txt
+
+# Point-in-time status reports we used to commit by accident.
+DEPLOYMENT_SUMMARY.md
+FINAL_ACCESS_SUMMARY.md
+USER_ACCESS_SUMMARY.md
+SETUP_STATUS.md
+SPICE_INGESTION_SUCCESS.md
+DASHBOARD_AND_STORY_SUMMARY.md
+iam-user-access-summary.md
+admin-user-access-complete.md
+dataset-fix-summary.md
+access-notification.md
+letoj-comprehensive-access.md
+story-dashboard-integration.md
+story-queries-by-chapter.md
+quick-reference-card.md
+
+# Local secrets / overrides
+config.local.env
+*.secret
+
+# OS / editor cruft
+.DS_Store
+*.swp

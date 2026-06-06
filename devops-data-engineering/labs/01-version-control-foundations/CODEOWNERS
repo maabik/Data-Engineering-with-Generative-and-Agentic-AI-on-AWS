@@ -1,0 +1,32 @@
+# Replace @your-org/* with the real teams in your GitHub org.
+# Drop this file at .github/CODEOWNERS and turn on branch protection ->
+# "Require review from Code Owners".
+
+# Default reviewer
+*                                      @your-org/data-platform
+
+# Infrastructure as code
+**/*.tf                                @your-org/data-platform-iac
+**/*.tfvars                            @your-org/data-platform-iac
+**/cdk/                                @your-org/data-platform-iac
+**/infra/                              @your-org/data-platform-iac
+
+# Glue / PySpark transformations
+**/glue_jobs/                          @your-org/data-eng
+
+# Orchestration (Step Functions ASL, Airflow DAGs)
+**/orchestration/                      @your-org/data-eng @your-org/data-platform
+**/dags/                               @your-org/data-eng
+
+# Agent components (prompts, tools, evals)
+**/prompts/                            @your-org/agent-platform
+**/tools/                              @your-org/agent-platform
+**/evals/                              @your-org/agent-platform
+
+# Security-sensitive paths
+**/iam/                                @your-org/data-platform @your-org/security
+**/guardrails/                         @your-org/agent-platform @your-org/security
+**/policies/                           @your-org/security
+
+# CI / CD
+.github/                               @your-org/data-platform

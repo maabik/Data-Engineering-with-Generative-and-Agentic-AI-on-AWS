@@ -1,0 +1,192 @@
+{
+  "TemplateId": "ai-finops-cost-cockpit",
+  "Name": "AI FinOps Cost Cockpit",
+  "Description": "Unified AI cost visibility: tenant spend, model mix, adjacent services, CUR reconciliation",
+  "DataSetReferences": [
+    {"DataSetPlaceholder": "daily_cost_by_tenant", "DataSetArn": "REPLACE"},
+    {"DataSetPlaceholder": "model_spend_share",    "DataSetArn": "REPLACE"},
+    {"DataSetPlaceholder": "adjacent_services",    "DataSetArn": "REPLACE"},
+    {"DataSetPlaceholder": "cost_vs_estimated",    "DataSetArn": "REPLACE"}
+  ],
+  "Sheets": [
+    {
+      "SheetId": "overview",
+      "Name": "Cost Overview",
+      "Visuals": [
+        {
+          "VisualId": "kpi_total_cost_30d",
+          "Type": "KPIVisual",
+          "Title": "Total AI Spend (Last 30d)",
+          "Metric": {"Field": "total_cost_usd", "Aggregation": "SUM"},
+          "ComparisonMethod": "PREVIOUS_PERIOD",
+          "DataSet": "daily_cost_by_tenant"
+        },
+        {
+          "VisualId": "kpi_total_requests_30d",
+          "Type": "KPIVisual",
+          "Title": "Total Requests (Last 30d)",
+          "Metric": {"Field": "request_count", "Aggregation": "SUM"},
+          "DataSet": "daily_cost_by_tenant"
+        },
+        {
+          "VisualId": "kpi_cost_per_1k_tokens",
+          "Type": "KPIVisual",
+          "Title": "Avg Cost per 1K Tokens",
+          "Metric": {
+            "CalculatedField": "total_cost_usd / (total_tokens / 1000.0)",
+            "Aggregation": "AVERAGE"
+          },
+          "DataSet": "daily_cost_by_tenant"
+        },
+        {
+          "VisualId": "line_daily_cost_by_service",
+          "Type": "LineChartVisual",
+          "Title": "Daily Spend by Service Category",
+          "XAxis": {"Field": "date", "DateGranularity": "DAY"},
+          "YAxis": {"Field": "total_cost_usd", "Aggregation": "SUM"},
+          "Color": {"Field": "service_category"},
+          "DataSet": "daily_cost_by_tenant"
+        },
+        {
+          "VisualId": "bar_cost_by_tenant",
+          "Type": "BarChartVisual",
+          "Title": "Top Tenants by Spend (Last 30d)",
+          "Category": {"Field": "tenant_id"},
+          "Value": {"Field": "total_cost_usd", "Aggregation": "SUM"},
+          "SortOrder": "DESC",
+          "MaxBars": 20,
+          "DataSet": "daily_cost_by_tenant"
+        },
+        {
+          "VisualId": "stacked_cost_by_workload",
+          "Type": "BarChartVisual",
+          "Title": "Daily Cost by Workload (Stacked)",
+          "Category": {"Field": "date", "DateGranularity": "DAY"},
+          "Value": {"Field": "total_cost_usd", "Aggregation": "SUM"},
+          "Color": {"Field": "workload"},
+          "ChartSubtype": "STACKED",
+          "DataSet": "daily_cost_by_tenant"
+        }
+      ]
+    },
+    {
+      "SheetId": "model_mix",
+      "Name": "Model Mix & Optimization",
+      "Visuals": [
+        {
+          "VisualId": "pie_model_spend_share",
+          "Type": "PieChartVisual",
+          "Title": "Spend Share by Model Family",
+          "Category": {"Field": "model_family"},
+          "Value": {"Field": "model_cost_usd", "Aggregation": "SUM"},
+          "DataSet": "model_spend_share"
+        },
+        {
+          "VisualId": "bar_cost_per_token_by_model",
+          "Type": "BarChartVisual",
+          "Title": "Effective Cost per 1K Tokens by Model",
+          "Category": {"Field": "model_id"},
+          "Value": {
+            "CalculatedField": "model_cost_usd / (total_tokens / 1000.0)",
+            "Aggregation": "AVERAGE"
+          },
+          "SortOrder": "DESC",
+          "DataSet": "model_spend_share"
+        },
+        {
+          "VisualId": "line_model_share_trend",
+          "Type": "LineChartVisual",
+          "Title": "Model Spend Share % Over Time",
+          "XAxis": {"Field": "date", "DateGranularity": "DAY"},
+          "YAxis": {"Field": "spend_share_pct", "Aggregation": "AVERAGE"},
+          "Color": {"Field": "model_family"},
+          "DataSet": "model_spend_share"
+        },
+        {
+          "VisualId": "table_model_top_tenants",
+          "Type": "TableVisual",
+          "Title": "Model Usage by Tenant",
+          "Columns": ["tenant_id", "model_id", "invocation_count", "total_tokens", "model_cost_usd", "spend_share_pct"],
+          "SortBy": {"Field": "model_cost_usd", "Direction": "DESC"},
+          "DataSet": "model_spend_share"
+        }
+      ]
+    },
+    {
+      "SheetId": "adjacent",
+      "Name": "Adjacent Services",
+      "Visuals": [
+        {
+          "VisualId": "bar_adjacent_cost",
+          "Type": "BarChartVisual",
+          "Title": "Adjacent Service Costs (KB, OpenSearch, S3 Vectors, Guardrails)",
+          "Category": {"Field": "service_category"},
+          "Value": {"Field": "total_cost_usd", "Aggregation": "SUM"},
+          "DataSet": "adjacent_services"
+        },
+        {
+          "VisualId": "line_adjacent_trend",
+          "Type": "LineChartVisual",
+          "Title": "Adjacent Service Cost Trend",
+          "XAxis": {"Field": "date", "DateGranularity": "DAY"},
+          "YAxis": {"Field": "total_cost_usd", "Aggregation": "SUM"},
+          "Color": {"Field": "service_category"},
+          "DataSet": "adjacent_services"
+        },
+        {
+          "VisualId": "table_adjacent_by_tenant",
+          "Type": "TableVisual",
+          "Title": "Adjacent Service Costs by Tenant",
+          "Columns": ["tenant_id", "service_category", "usage_type", "total_cost_usd"],
+          "DataSet": "adjacent_services"
+        }
+      ]
+    },
+    {
+      "SheetId": "reconciliation",
+      "Name": "CUR Reconciliation",
+      "Visuals": [
+        {
+          "VisualId": "bar_variance",
+          "Type": "BarChartVisual",
+          "Title": "Estimated vs. Actual Cost Variance % by Model",
+          "Category": {"Field": "model_family"},
+          "Value": {"Field": "variance_pct", "Aggregation": "AVERAGE"},
+          "DataSet": "cost_vs_estimated"
+        },
+        {
+          "VisualId": "kpi_join_rate",
+          "Type": "KPIVisual",
+          "Title": "CUR Join Rate %",
+          "Metric": {
+            "CalculatedField": "joined_count / (joined_count + unjoined_count) * 100",
+            "Aggregation": "AVERAGE"
+          },
+          "DataSet": "cost_vs_estimated"
+        },
+        {
+          "VisualId": "scatter_est_vs_actual",
+          "Type": "ScatterPlotVisual",
+          "Title": "Estimated vs. Actual Cost (per tenant/day)",
+          "XAxis": {"Field": "sum_estimated_usd", "Aggregation": "SUM"},
+          "YAxis": {"Field": "sum_actual_usd", "Aggregation": "SUM"},
+          "Color": {"Field": "model_family"},
+          "DataSet": "cost_vs_estimated"
+        }
+      ]
+    }
+  ],
+  "Filters": [
+    {
+      "FilterId": "date_range",
+      "Column": "date",
+      "Type": "RelativeDatesFilter",
+      "RelativeDateType": "LAST",
+      "TimeGranularity": "DAY",
+      "RelativeDateValue": 30
+    },
+    {"FilterId": "tenant_filter", "Column": "tenant_id", "Type": "CategoryFilter", "SelectAllOptions": "FILTER_ALL_VALUES"},
+    {"FilterId": "model_filter",  "Column": "model_family", "Type": "CategoryFilter", "SelectAllOptions": "FILTER_ALL_VALUES"},
+    {"FilterId": "workload_filter","Column": "workload",    "Type": "CategoryFilter", "SelectAllOptions": "FILTER_ALL_VALUES"}
+  ]
+}

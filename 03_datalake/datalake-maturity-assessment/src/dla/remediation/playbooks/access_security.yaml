@@ -1,0 +1,70 @@
+items:
+  - from_level: 1
+    title: "Enable default SSE on every lake bucket and turn on Public Access Block"
+    impact: 5
+    effort: S
+    aws_services: [Amazon S3, AWS KMS]
+    book_reference: "Chapter 2 — Data Security and Governance"
+    why_it_matters: |
+      Unencrypted lake buckets fail every audit. Default SSE + PAB is the floor
+      and takes hours, not weeks.
+    steps:
+      - "Apply default SSE-S3 (or better) to every lake bucket."
+      - "Enable BlockPublicAcls/IgnorePublicAcls/BlockPublicPolicy/RestrictPublicBuckets."
+      - "Turn on S3 access logging into a separate central bucket."
+    acceptance_criteria:
+      - "All lake buckets show SSEAlgorithm in GetBucketEncryption."
+      - "All lake buckets show all 4 PAB flags = true."
+
+  - from_level: 2
+    title: "Switch to SSE-KMS with customer-managed keys; enable Lake Formation"
+    impact: 5
+    effort: M
+    aws_services: [AWS KMS, AWS Lake Formation]
+    book_reference: "Chapter 2 — Data Security and Governance"
+    why_it_matters: |
+      AWS-managed KMS keys deny you key rotation control and audit clarity. CMKs
+      with key policies + Lake Formation grants are the actual access fabric.
+    steps:
+      - "Provision per-domain CMKs with SCP-controlled key policies."
+      - "Re-encrypt lake objects via S3 Batch Operations."
+      - "Use lakeformation-bootstrap to register lake locations and grant DB-/table-level perms."
+      - "Remove IAM_ALLOWED_PRINCIPALS default permissions."
+    acceptance_criteria:
+      - "≥1 CMK per data domain in use."
+      - "LF permission count > 0; IAM passthrough off."
+    reference_code: "../../lakeformation-bootstrap/"
+
+  - from_level: 3
+    title: "Roll out LF-Tag-Based Access Control across databases and tables"
+    impact: 4
+    effort: M
+    aws_services: [AWS Lake Formation]
+    book_reference: "Chapter 2 — Data Security and Governance"
+    why_it_matters: |
+      Permission sprawl at the table level is unmaintainable past a few hundred
+      tables. LF-TBAC scales by attribute, not by row in IAM.
+    steps:
+      - "Define LF-Tag taxonomy: domain, sensitivity, lifecycle."
+      - "Apply tags to databases and tables."
+      - "Replace direct grants with tag-policy grants."
+    acceptance_criteria:
+      - "≥10 LF-Tags defined and applied; ≥50% of permissions are LF-Tag policies."
+
+  - from_level: 4
+    title: "Add column-level filters and Identity Center integration for cross-account sharing"
+    impact: 4
+    effort: L
+    aws_services: [AWS Lake Formation, AWS Identity Center, AWS RAM]
+    book_reference: "Chapter 2 — Data Security and Governance"
+    why_it_matters: |
+      Persona-based access (analyst, ML engineer, exec) demands column-level
+      filtering. Cross-account RAM via Identity Center is the modern shape for
+      portfolio/multi-account orgs.
+    steps:
+      - "Define column filters for PII; apply to top-20 tables."
+      - "Wire Identity Center; map groups to LF principals."
+      - "Use lakeformation-data-filters as the reference."
+    acceptance_criteria:
+      - "Two analyst personas see distinct column projections of the same table."
+    reference_code: "../../lakeformation-data-filters/"

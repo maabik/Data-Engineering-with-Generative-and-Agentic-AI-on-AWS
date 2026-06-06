@@ -1,0 +1,61 @@
+items:
+  - from_level: 1
+    title: "Add ad-hoc validation SQL to the highest-impact pipelines"
+    impact: 4
+    effort: S
+    aws_services: [AWS Glue, Amazon Athena]
+    book_reference: "Chapter 5 — Big Data Processing with AWS Glue and AI Agents"
+    why_it_matters: |
+      Even unsophisticated row-count and null checks catch the majority of bad
+      data before it reaches consumers.
+    steps:
+      - "Add post-load assertions (count, nullity, range) to top-5 pipelines."
+      - "Fail the pipeline on assertion failure; alert on Slack/email."
+    acceptance_criteria:
+      - "5 pipelines fail loud on bad data."
+
+  - from_level: 2
+    title: "Integrate Deequ or Great Expectations into ≥50% of pipelines"
+    impact: 5
+    effort: M
+    aws_services: [AWS Glue, Amazon Deequ]
+    book_reference: "Chapter 5 — Big Data Processing with AWS Glue and AI Agents"
+    why_it_matters: |
+      Hand-rolled checks don't scale, can't be reasoned about by agents, and
+      drift from spec. A real DQ library is testable and shareable.
+    steps:
+      - "Add Deequ/GE to the standard Glue job template."
+      - "Migrate ad-hoc checks into declarative expectations."
+      - "Publish DQ results to a central table for dashboarding."
+    acceptance_criteria:
+      - "≥50% of Glue jobs run Deequ/GE checks."
+
+  - from_level: 3
+    title: "Declare freshness SLOs and add CloudWatch anomaly alarms"
+    impact: 4
+    effort: M
+    aws_services: [Amazon CloudWatch, AWS Glue]
+    book_reference: "Chapter 5 — Big Data Processing with AWS Glue and AI Agents"
+    why_it_matters: |
+      Quality at the row level isn't enough — consumers care that the table is
+      *fresh*. SLOs + alarms are the contract.
+    steps:
+      - "Define freshness SLO per critical table (e.g., 'updated within 4h')."
+      - "Emit a freshness metric; alarm when SLO breaches."
+    acceptance_criteria:
+      - "Top-20 tables have freshness alarms in CloudWatch."
+
+  - from_level: 4
+    title: "Wire EventBridge → Step Functions → Bedrock agent for auto-RCA on DQ failures"
+    impact: 4
+    effort: L
+    aws_services: [Amazon Bedrock, AWS Step Functions, Amazon EventBridge]
+    book_reference: "Chapter 5 — Big Data Processing with AWS Glue and AI Agents"
+    why_it_matters: |
+      Most on-call time is wasted on the same five RCAs. An agent can do the
+      first 80% of triage before the human gets paged.
+    steps:
+      - "Define an agent with tools to inspect lineage, quality runs, and recent commits."
+      - "Trigger the agent on DQ alarm; deliver findings into the alert channel."
+    acceptance_criteria:
+      - "Agent attaches RCA notes to ≥80% of DQ alerts within 5 minutes."

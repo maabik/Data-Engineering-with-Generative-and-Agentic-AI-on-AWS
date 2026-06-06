@@ -1,0 +1,22 @@
+{
+  "run_id": "sales_etl_20260520_021500",
+  "pipeline": "sales_etl",
+  "status": "Failed",
+  "started_at": "2026-05-20T02:15:00Z",
+  "ended_at": "2026-05-20T02:38:42Z",
+  "airflow": {
+    "dag_id": "sales_etl",
+    "task_id": "transform_orders_spark",
+    "try_number": 2,
+    "source": {
+      "s3_uri": "s3://__BUCKET__/sample-logs/airflow/sales_etl_20260520.log"
+    }
+  },
+  "spark": {
+    "application_id": "application_1747700100200_0042",
+    "master": "EMR Serverless",
+    "source": {
+      "s3_uri": "s3://__BUCKET__/sample-logs/spark/sales_etl_20260520_stderr.log"
+    }
+  }
+}

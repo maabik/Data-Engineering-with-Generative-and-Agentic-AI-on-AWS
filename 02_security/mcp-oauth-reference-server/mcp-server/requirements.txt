@@ -1,0 +1,4 @@
+fastapi>=0.111
+httpx>=0.27
+python-jose[cryptography]>=3.3
+uvicorn[standard]>=0.30

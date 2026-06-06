@@ -1,0 +1,59 @@
+name: merge-to-main
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  staging-apply:
+    runs-on: ubuntu-latest
+    environment: staging
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with: { terraform_version: 1.8.5 }
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.STAGING_DEPLOY_ROLE }}
+          aws-region: us-east-1
+      - name: Apply staging
+        working-directory: reference-pipeline/terraform/envs/staging
+        run: |
+          terraform init
+          terraform apply -auto-approve
+
+  staging-smoke:
+    needs: staging-apply
+    runs-on: ubuntu-latest
+    environment: staging
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - uses: hashicorp/setup-terraform@v3
+        with: { terraform_version: 1.8.5 }
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.STAGING_DEPLOY_ROLE }}
+          aws-region: us-east-1
+      - run: pip install -r reference-pipeline/requirements-dev.txt
+      - name: Smoke + DQ
+        env:
+          TF_DIR: reference-pipeline/terraform/envs/staging
+        run: |
+          terraform -chdir=$TF_DIR init
+          pytest labs/05-pipeline-testing-strategy/smoke/test_smoke.py -q
+          python labs/05-pipeline-testing-strategy/smoke/run_dq.py \
+            --contract labs/05-pipeline-testing-strategy/contracts/expectations/region_revenue.yaml \
+            --database "$(terraform -chdir=$TF_DIR output -raw curated_database)" \
+            --output-location "s3://$(terraform -chdir=$TF_DIR output -raw curated_bucket)/_dq_smoke/"

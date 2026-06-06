@@ -1,0 +1,123 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  MCP OAuth 2.1 reference: Cognito user pool, hosted domain, resource server,
+  and scopes for an MCP server reference implementation.
+
+Parameters:
+  StackPrefix:
+    Type: String
+    Default: mcp-oauth-ref
+    Description: Prefix for resource names; must be DNS-safe (lowercase, hyphens).
+    AllowedPattern: '^[a-z][a-z0-9-]{2,32}$'
+  DomainPrefix:
+    Type: String
+    Description: Globally unique prefix for the Cognito hosted UI domain.
+    AllowedPattern: '^[a-z][a-z0-9-]{2,62}$'
+  CallbackUrl:
+    Type: String
+    Default: http://localhost:8765/callback
+    Description: OAuth redirect URI for the reference client.
+
+Resources:
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub ${StackPrefix}-pool
+      AutoVerifiedAttributes: [email]
+      UsernameAttributes: [email]
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireLowercase: true
+          RequireUppercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Ref DomainPrefix
+      UserPoolId: !Ref UserPool
+
+  ResourceServer:
+    Type: AWS::Cognito::UserPoolResourceServer
+    Properties:
+      UserPoolId: !Ref UserPool
+      Identifier: !Sub https://${StackPrefix}.mcp
+      Name: !Sub ${StackPrefix}-resource-server
+      Scopes:
+        - ScopeName: tools.read
+          ScopeDescription: List and call read-only MCP tools
+        - ScopeName: tools.write
+          ScopeDescription: Call write/mutating MCP tools
+
+  # A bootstrap client for the reference CLI. Production clients register
+  # dynamically via the DCR proxy.
+  BootstrapClient:
+    Type: AWS::Cognito::UserPoolClient
+    DependsOn: ResourceServer
+    Properties:
+      UserPoolId: !Ref UserPool
+      ClientName: !Sub ${StackPrefix}-bootstrap
+      GenerateSecret: false
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows: [code]
+      AllowedOAuthScopes:
+        - openid
+        - email
+        - !Sub https://${StackPrefix}.mcp/tools.read
+        - !Sub https://${StackPrefix}.mcp/tools.write
+      CallbackURLs: [!Ref CallbackUrl]
+      SupportedIdentityProviders: [COGNITO]
+      ExplicitAuthFlows:
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_SRP_AUTH
+
+  # Role the DCR proxy assumes to call AdminCreateUserPoolClient.
+  DcrProxyRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${StackPrefix}-dcr-proxy
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com, ec2.amazonaws.com]
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: cognito-client-admin
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cognito-idp:CreateUserPoolClient
+                  - cognito-idp:DescribeUserPoolClient
+                  - cognito-idp:UpdateUserPoolClient
+                  - cognito-idp:DeleteUserPoolClient
+                Resource: !GetAtt UserPool.Arn
+
+Outputs:
+  UserPoolId:
+    Value: !Ref UserPool
+    Export: { Name: !Sub '${AWS::StackName}-UserPoolId' }
+  UserPoolArn:
+    Value: !GetAtt UserPool.Arn
+  Issuer:
+    Description: OIDC issuer URL used to fetch JWKS and validate tokens.
+    Value: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}
+  HostedUiDomain:
+    Value: !Sub https://${DomainPrefix}.auth.${AWS::Region}.amazoncognito.com
+  AuthorizationEndpoint:
+    Value: !Sub https://${DomainPrefix}.auth.${AWS::Region}.amazoncognito.com/oauth2/authorize
+  TokenEndpoint:
+    Value: !Sub https://${DomainPrefix}.auth.${AWS::Region}.amazoncognito.com/oauth2/token
+  ResourceServerIdentifier:
+    Value: !Sub https://${StackPrefix}.mcp
+  BootstrapClientId:
+    Value: !Ref BootstrapClient
+  DcrProxyRoleArn:
+    Value: !GetAtt DcrProxyRole.Arn

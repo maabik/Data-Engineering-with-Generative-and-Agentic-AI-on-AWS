@@ -1,0 +1,61 @@
+{
+  "landlord_name": "Riverbend Office Holdings, LLC",
+  "tenant_name": "Helix Diagnostics Inc.",
+  "guarantor_name": "Helix Holdings Inc.",
+  "premises_address": "1880 Pacific Avenue, Suite 400, San Diego, CA 92101",
+  "rentable_square_feet": 14250,
+  "use_clause": "General office and clinical lab use, including ancillary R&D",
+  "lease_type": "NNN",
+  "lease_commencement_date": "2024-11-01",
+  "lease_expiration_date": "2031-10-31",
+  "term_months": 84,
+  "security_deposit": 95000.0,
+  "renewal_options": "Two (2) successive five (5) year renewal options at 95% of fair market rent",
+  "early_termination": "One-time termination right effective month 60 with 12 months' notice and $250,000 fee",
+  "operating_expense_recovery": "Tenant pays pro-rata share of operating expenses, taxes, and insurance over a 2024 base year",
+  "tenant_improvement_allowance": 855000.0,
+  "rent_schedule": [
+    {
+      "period_start": "2024-11-01",
+      "period_end": "2025-10-31",
+      "monthly_rent": 47500.0,
+      "annual_rent": 570000.0
+    },
+    {
+      "period_start": "2025-11-01",
+      "period_end": "2026-10-31",
+      "monthly_rent": 48925.0,
+      "annual_rent": 587100.0
+    },
+    {
+      "period_start": "2026-11-01",
+      "period_end": "2027-10-31",
+      "monthly_rent": 50392.75,
+      "annual_rent": 604713.0
+    },
+    {
+      "period_start": "2027-11-01",
+      "period_end": "2028-10-31",
+      "monthly_rent": 51904.53,
+      "annual_rent": 622854.39
+    },
+    {
+      "period_start": "2028-11-01",
+      "period_end": "2029-10-31",
+      "monthly_rent": 53461.67,
+      "annual_rent": 641540.02
+    },
+    {
+      "period_start": "2029-11-01",
+      "period_end": "2030-10-31",
+      "monthly_rent": 55065.52,
+      "annual_rent": 660786.22
+    },
+    {
+      "period_start": "2030-11-01",
+      "period_end": "2031-10-31",
+      "monthly_rent": 56717.49,
+      "annual_rent": 680609.81
+    }
+  ]
+}

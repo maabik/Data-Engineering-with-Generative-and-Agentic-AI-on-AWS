@@ -1,0 +1,611 @@
+[
+  {
+    "test": "data-profiling-agent",
+    "expected_agent": "data_profiling_agent",
+    "agents_invoked": [
+      "dpa_agent"
+    ],
+    "routing_pass": true,
+    "downstream_status": "response: {\"tableName\": \"orchtest-20260530233655\", \"sourceUri\": \"s3://dpa-123456789012-us-\u2026",
+    "elapsed_s": 181.2,
+    "data_required": true,
+    "raw": {
+      "plan": "The user wants a full data profile of a CSV file in S3, including schema insights, PK candidates, and PII detection. This is a direct fit for the dpa_agent (Data Profiling specialist), which runs AWS DataBrew against an S3 URI and emits a structured insights JSON.",
+      "agents_invoked": [
+        "dpa_agent"
+      ],
+      "results": {
+        "dpa_agent": {
+          "tableName": "orchtest-20260530233655",
+          "sourceUri": "s3://dpa-123456789012-us-west-2/orchtest/orchtest-20260530233655.csv",
+          "reportUri": "s3://dpa-123456789012-us-west-2/profile/dpa-orchtest-20260530233655/dpa-orchtest-20260530233655_bc8ec0d85241a52b948bbb89009b7fc40d615cef33c30e1fe0250bf6ddffb72f.json",
+          "insightsUri": "s3://dpa-123456789012-us-west-2/insights/orchtest-20260530233655.json",
+          "sampleSize": 10,
+          "dataDomain": "Retail / E-Commerce Orders",
+          "schema": [
+            {
+              "column": "order_id",
+              "dataType": "INT",
+              "nullPct": 0.0,
+              "distinctCount": 10,
+              "cardinality": "high",
+              "notes": "Perfectly sequential integers 1\u201310; zero skew; strong primary key candidate."
+            },
+            {
+              "column": "customer_id",
+              "dataType": "INT",
+              "nullPct": 0.0,
+              "distinctCount": 8,
+              "cardinality": "high",
+              "notes": "4 orders share a customer_id (repeat customers); slight right skew; not unique \u2014 not a PK."
+            },
+            {
+              "column": "product_id",
+              "dataType": "VARCHAR",
+              "nullPct": 0.0,
+              "distinctCount": 5,
+              "cardinality": "medium",
+              "notes": "5 distinct values; constant 4-char length; likely a product catalog FK."
+            },
+            {
+              "column": "order_date",
+              "dataType": "TIMESTAMP",
+              "nullPct": null,
+              "distinctCount": null,
+              "cardinality": "unknown",
+              "notes": "No numeric statistics returned by DataBrew; null/distinct count must be validated separately."
+            },
+            {
+              "column": "quantity",
+              "dataType": "INT",
+              "nullPct": 0.0,
+              "distinctCount": 4,
+              "cardinality": "low",
+              "notes": "Right-skewed (skew=1.05); most orders are qty=1; max=4."
+            },
+            {
+              "column": "unit_price",
+              "dataType": "DOUBLE",
+              "nullPct": 0.0,
+              "distinctCount": 5,
+              "cardinality": "medium",
+              "notes": "Wide range ($19.99\u2013$99.99); moderate right skew (0.60); stddev=$29.51."
+            },
+            {
+              "column": "total_price",
+              "dataType": "DOUBLE",
+              "nullPct": 0.0,
+              "distinctCount": 8,
+              "cardinality": "high",
+              "notes": "Left-skewed (skew=-0.87); likely = quantity \u00d7 unit_price \u2014 recommend derived-column validation."
+            },
+            {
+              "column": "region",
+              "dataType": "VARCHAR",
+              "nullPct": 0.0,
+              "distinctCount": 4,
+              "cardinality": "low",
+              "notes": "4 distinct region values; excellent partition candidate."
+            }
+          ],
+          "primaryKeyCandidates": [
+            {
+              "column": "order_id",
+              "reason": "100% distinct (10/10), zero nulls, sequential integer \u2014 uniquely identifies every row."
+            }
+          ],
+          "partitionCandidates": [
+            {
+              "column": "order_date",
+              "reason": "TIMESTAMP; standard date/month partitioning for time-series order data."
+            },
+            {
+              "column": "region",
+              "reason": "Low cardinality (4 values); enables geo-scoped query pruning."
+            }
+          ],
+          "indexCandidates": [
+            {
+              "column": "customer_id",
+              "reason": "High-cardinality FK integer; typical lookup pattern in order analytics."
+            },
+            {
+              "column": "product_id",
+              "reason": "String ID matching product catalog FK pattern; secondary index accelerates joins."
+            }
+          ],
+          "sensitivity": [
+            {
+              "column": "customer_id",
+              "type": "QUASI-IDENTIFIER",
+              "reason": "Name contains 'customer_id'; may reference a PII-bearing customer entity. Flag for data lineage review."
+            }
+          ]
+        }
+      },
+      "summary": "The dpa_agent successfully profiled orchtest-20260530233655.csv (10 rows, 8 columns). Here are the key findings:\n\n\ud83d\udcd0 SCHEMA (8 columns \u2014 Retail / E-Commerce Orders domain)\n\u2022 order_id     \u2192 INT        | 0% nulls | 10 distinct | high cardinality\n\u2022 customer_id  \u2192 INT        | 0% nulls |  8 distinct | high cardinality\n\u2022 product_id   \u2192 VARCHAR    | 0% nulls |  5 distinct | medium cardinality\n\u2022 order_date   \u2192 TIMESTAMP  | unknown  | unknown     | \u26a0\ufe0f DataBrew returned no stats \u2014 validate separately\n\u2022 quantity     \u2192 INT        | 0% nulls |  4 distinct | low cardinality (right-skewed, skew=1.05)\n\u2022 unit_price   \u2192 DOUBLE     | 0% nulls |  5 distinct | medium cardinality (range $19.99\u2013$99.99)\n\u2022 total_price  \u2192 DOUBLE     | 0% nulls |  8 distinct | high cardinality (left-skewed, skew=-0.87)\n\u2022 region       \u2192 VARCHAR    | 0% nulls |  4 distinct | low cardinality\n\n\ud83d\udd11 PRIMARY KEY CANDIDATE\n\u2022 order_id \u2014 perfectly sequential, 100% distinct, zero nulls. Clear sole PK.\n\n\ud83d\uddc2\ufe0f PARTITION CANDIDATES\n\u2022 order_date (TIMESTAMP) \u2014 standard time-range pruning for order analytics.\n\u2022 region (VARCHAR, 4 values) \u2014 efficient geo-scoped partitioning.\n\n\ud83d\udd0e INDEX CANDIDATES\n\u2022 customer_id \u2014 FK lookup pattern.\n\u2022 product_id  \u2014 product catalog FK, join acceleration.\n\n\u26a0\ufe0f PII / SENSITIVITY FLAGS\n\u2022 customer_id \u2014 flagged as a QUASI-IDENTIFIER. It references a customer entity that may expose personal data via downstream joins. Recommend data lineage review and potential masking/tokenization.\n\n\ud83d\udccb QUALITY NOTES\n\u2022 total_price appears to be a derived column (quantity \u00d7 unit_price) \u2014 a derived-column integrity check is recommended.\n\u2022 order_date statistics are unavailable from the DataBrew report; a full-scan DQ check (via dqa_agent) is advised to confirm nullability.\n\u2022 All other columns show zero nulls, indicating a high-quality initial load.\n\nFull profile report: s3://dpa-123456789012-us-west-2/profile/dpa-orchtest-20260530233655/...\nInsights JSON: s3://dpa-123456789012-us-west-2/insights/orchtest-20260530233655.json"
+    },
+    "error": null
+  },
+  {
+    "test": "data-architect-agent",
+    "expected_agent": "data_architect_agent",
+    "agents_invoked": [
+      "daa_agent"
+    ],
+    "routing_pass": true,
+    "downstream_status": "response: {\"database\": \"daa_curated\", \"rawTable\": \"datausa_population_raw\", \"curatedTable\"\u2026",
+    "elapsed_s": 140.1,
+    "data_required": true,
+    "raw": {
+      "plan": "The user wants to take existing DataBrew profiling insights and run the full schema-design + Glue-table-registration + ETL pipeline. The daa_agent (Data Architect) is the exact specialist for this: it consumes an insights_uri, designs a curated schema, registers raw and curated Glue tables, and executes the PySpark ETL job. I invoked it with the exact insights_uri supplied by the user.",
+      "agents_invoked": [
+        "daa_agent"
+      ],
+      "results": {
+        "daa_agent": {
+          "database": "daa_curated",
+          "rawTable": "datausa_population_raw",
+          "curatedTable": "datausa_population_curated",
+          "location": "s3://dpa-123456789012-us-west-2/curated/datausa_population/",
+          "partitionKeys": [
+            {
+              "name": "dataset",
+              "type": "string"
+            },
+            {
+              "name": "ingested_at",
+              "type": "timestamp"
+            }
+          ],
+          "columns": [
+            {
+              "name": "data",
+              "type": "string"
+            },
+            {
+              "name": "source_endpoint",
+              "type": "string"
+            }
+          ],
+          "glueJob": {
+            "ok": true,
+            "job": "daa-curate-datausa_population",
+            "runId": "jr_eae1b6cf639be52e8fcd53b951a5b7e2b84400cf669349c84425b77c6cad76be",
+            "state": "SUCCEEDED",
+            "error": null
+          },
+          "designUri": "s3://dpa-123456789012-us-west-2/designs/datausa-population_20260520T044816Z_f6542f8903d3409290d2dfe9a797e102.json"
+        }
+      },
+      "summary": "The full schema-design \u2192 table-registration \u2192 ETL pipeline completed successfully. Here is what was delivered:\n\n**Glue Database:** `daa_curated`\n\n**Tables registered:**\n- `datausa_population_raw` \u2014 unpartitioned, pointed at the original JSON landing prefix (preserves the raw file as-is).\n- `datausa_population_curated` \u2014 Parquet, partitioned by `dataset (string)` and `ingested_at (timestamp)`, written to `s3://dpa-123456789012-us-west-2/curated/datausa_population/`.\n\n**Schema decisions:**\n- `data` \u2192 `string` (opaque STRUCT from the DataUSA API envelope; must be flattened/unnested downstream before broad access is granted \u2014 PII sensitivity flag noted).\n- `source_endpoint` \u2192 `string`.\n- `dataset` \u2192 partition key `string` (low-cardinality discriminator enabling multi-dataset table sharing).\n- `ingested_at` \u2192 partition key `timestamp` (ISO-8601 field promoted from VARCHAR, aligns with existing Hive-style `ingest_date/hour` S3 path layout).\n\n**ETL job:** `daa-curate-datausa_population` \u2014 run `jr_eae1b6cf639be52e8fcd53b951a5b7e2b84400cf669349c84425b77c6cad76be` \u2192 **SUCCEEDED**.\n\n**Design artefact saved to:** `s3://dpa-123456789012-us-west-2/designs/datausa-population_20260520T044816Z_f6542f8903d3409290d2dfe9a797e102.json`\n\n**Next recommended step:** Run `dqa_agent` against the design URI to generate and verify Deequ data-quality constraints on the curated table."
+    },
+    "error": null
+  },
+  {
+    "test": "data-quality-deequ-agent",
+    "expected_agent": "data_quality_deequ_agent",
+    "agents_invoked": [
+      "dqa_agent"
+    ],
+    "routing_pass": true,
+    "downstream_status": "response: {\"database\": \"daa_curated\", \"table\": \"orchtest_20260530233655_curated\", \"runId\":\u2026",
+    "elapsed_s": 145.4,
+    "data_required": true,
+    "raw": {
+      "plan": "The user requested Deequ constraint suggestion and verification on a specific design file. The dqa_agent is the exact specialist for this \u2014 it accepts a design_uri, runs AWS Deequ constraint suggestion + verification, and emits a quality insights JSON. No other agents are needed.",
+      "agents_invoked": [
+        "dqa_agent"
+      ],
+      "results": {
+        "dqa_agent": {
+          "database": "daa_curated",
+          "table": "orchtest_20260530233655_curated",
+          "runId": "orchtest_20260530233655_dq",
+          "suggestionsUri": "s3://dpa-123456789012-us-west-2/dq-reports/orchtest_20260530233655_curated/suggestions/orchtest_20260530233655_dq.json",
+          "resultsUri": "s3://dpa-123456789012-us-west-2/dq-reports/orchtest_20260530233655_curated/results/orchtest_20260530233655_dq.json",
+          "parquetPrefix": "s3://dpa-123456789012-us-west-2/dq-reports/orchtest_20260530233655_curated/parquet/",
+          "overallStatus": "Success",
+          "totalChecks": 9,
+          "passedCount": 9,
+          "failedCount": 0,
+          "topFailing": [],
+          "athena": {
+            "database": "dqa_dq",
+            "table": "dq_results",
+            "sampleQuery": "SELECT \"constraint\", constraint_status, constraint_message FROM \"dqa_dq\".\"dq_results\" WHERE run_id = 'orchtest_20260530233655_dq' ORDER BY constraint_status",
+            "sampleRows": [
+              {
+                "constraint": "CompletenessConstraint(Completeness(total_price,None,None))",
+                "constraint_status": "Success",
+                "constraint_message": ""
+              },
+              {
+                "constraint": "CompletenessConstraint(Completeness(order_id,None,None))",
+                "constraint_status": "Success",
+                "constraint_message": ""
+              },
+              {
+                "constraint": "UniquenessConstraint(Uniqueness(List(order_id),None,None))",
+                "constraint_status": "Success",
+                "constraint_message": ""
+              },
+              {
+                "constraint": "CompletenessConstraint(Completeness(product_id,None,None))",
+                "constraint_status": "Success",
+                "constraint_message": ""
+              },
+              {
+                "constraint": "CompletenessConstraint(Completeness(unit_price,None,None))",
+                "constraint_status": "Success",
+                "constraint_message": ""
+              },
+              {
+                "constraint": "CompletenessConstraint(Completeness(region,None,None))",
+                "constraint_status": "Success",
+                "constraint_message": ""
+              },
+              {
+                "constraint": "CompletenessConstraint(Completeness(customer_id,None,None))",
+                "constraint_status": "Success",
+                "constraint_message": ""
+              },
+              {
+                "constraint": "CompletenessConstraint(Completeness(quantity,None,None))",
+                "constraint_status": "Success",
+                "constraint_message": ""
+              },
+              {
+                "constraint": "CompletenessConstraint(Completeness(order_date,None,None))",
+                "constraint_status": "Success",
+                "constraint_message": ""
+              }
+            ]
+          },
+          "dqInsightsUri": "s3://dpa-123456789012-us-west-2/dq-insights/orchtest-20260530233655.json"
+        }
+      },
+      "summary": "\u2705 All 9 Deequ constraints passed with zero failures against curated table `orchtest_20260530233655_curated` in database `daa_curated`. Here's the full breakdown:\n\n**Constraint Suite (9/9 passed \u2014 100%)**\n| Constraint Type | Column | Status |\n|---|---|---|\n| Completeness | order_id | \u2705 Success |\n| Uniqueness | order_id | \u2705 Success |\n| Completeness | customer_id | \u2705 Success |\n| Completeness | product_id | \u2705 Success |\n| Completeness | quantity | \u2705 Success |\n| Completeness | unit_price | \u2705 Success |\n| Completeness | total_price | \u2705 Success |\n| Completeness | region | \u2705 Success |\n| Completeness | order_date | \u2705 Success |\n\n**Key Highlights:**\n- **Primary key integrity**: `order_id` is both fully populated and unique \u2014 no duplicate orders exist.\n- **Financial columns**: `unit_price` and `total_price` are 100% complete \u2014 safe for revenue aggregations.\n- **Customer analytics**: `customer_id` is fully populated \u2014 no gaps for customer-level reporting.\n- **Overall status**: `Success` \u2014 this dataset is **fit-for-use** with no remediation, re-ingestion, or quarantine needed.\n\n**Artifacts written:**\n- \ud83d\udcc4 Suggestions: `s3://dpa-123456789012-us-west-2/dq-reports/orchtest_20260530233655_curated/suggestions/orchtest_20260530233655_dq.json`\n- \ud83d\udcc4 Results: `s3://dpa-123456789012-us-west-2/dq-reports/orchtest_20260530233655_curated/results/orchtest_20260530233655_dq.json`\n- \ud83d\udcc4 DQ Insights JSON: `s3://dpa-123456789012-us-west-2/dq-insights/orchtest-20260530233655.json`\n- \ud83d\uddc2\ufe0f Parquet: `s3://dpa-123456789012-us-west-2/dq-reports/orchtest_20260530233655_curated/parquet/`\n- \ud83d\udd0d Queryable via Athena: `SELECT * FROM \"dqa_dq\".\"dq_results\" WHERE run_id = 'orchtest_20260530233655_dq'`"
+    },
+    "error": null
+  },
+  {
+    "test": "data-quality-agent",
+    "expected_agent": "data_quality_agent",
+    "agents_invoked": [
+      "dqr_agent"
+    ],
+    "routing_pass": true,
+    "downstream_status": "response: {\"database\": \"daa_curated\", \"table\": \"datausa_population_curated\", \"runId\": \"dat\u2026",
+    "elapsed_s": 87.1,
+    "data_required": true,
+    "raw": {
+      "plan": "Route the DQ insights URI directly to the dqr_agent (DQ Remediation specialist) for a one-shot diagnostic verdict \u2014 no other agent is needed since the request is purely about root-causing failed Deequ constraints and producing a remediation plan.",
+      "agents_invoked": [
+        "dqr_agent"
+      ],
+      "results": {
+        "dqr_agent": {
+          "database": "daa_curated",
+          "table": "datausa_population_curated",
+          "runId": "datausa_population_20260520t044816z_f6542f8903d3409290d2dfe9a797e102",
+          "verdict": "blocked",
+          "severity": "critical",
+          "rootCauses": [
+            {
+              "id": "RC-01",
+              "constraint": "Deequ ConstraintSuggestionRunner \u2014 structural profiling of column `data`",
+              "column": "data",
+              "evidence": "Glue job dqa-deequ-job (run jr_c1d85cb4b831a524f1445e18c50c9fb043ff099c333d132881573967e7dbf034) terminated with: 'An error occurred while calling o105.count. org.apache.spark.sql.types.StringType$ cannot be cast to org.apache.spark.sql.types.StructType'. The error occurred at the profiling stage \u2014 before any single constraint was evaluated, so zero DQ results exist.",
+              "hypothesis": "The `data` column is catalogued in the AWS Glue Data Catalog as STRING, but its payload is serialised JSON. The Deequ ConstraintSuggestionRunner attempts to resolve it as a StructType during schema introspection. Spark's type system throws an irrecoverable ClassCastException (StringType$ \u2192 StructType), crashing the entire Spark job.",
+              "confidence": "high"
+            },
+            {
+              "id": "RC-02",
+              "constraint": "Glue job concurrency throttle \u2014 ConcurrentRunsExceededException",
+              "column": null,
+              "evidence": "The Glue job was throttled on the first 22 attempts (ConcurrentRunsExceededException) before a worker slot became available. Once a slot was granted, the job ran and failed with RC-01.",
+              "hypothesis": "The default Glue job concurrency limit was exhausted by other simultaneous DQ runs, causing unnecessary retries that delayed detection of the fatal type-cast error.",
+              "confidence": "high"
+            }
+          ],
+          "remediationSteps": [
+            {
+              "priority": 1,
+              "owner": "Data Engineer \u2014 Glue / PySpark",
+              "action": "Patch the Deequ Glue script to explicitly exclude the `data` column from StructType profiling",
+              "detail": "Drop or cast the `data` column before passing the DataFrame to ConstraintSuggestionRunner: e.g. `df = df.drop('data')` or supply an explicit column allowlist. Redeploy and re-trigger the DQ agent.",
+              "estimatedEffort": "2\u20134 hours"
+            },
+            {
+              "priority": 2,
+              "owner": "Data Engineer \u2014 ETL / Lakehouse",
+              "action": "Build a JSON-flattening / unnesting transform for the `data` column",
+              "detail": "Create a downstream Glue ETL job that parses the `data` STRING column via `from_json(col('data'), <inferred_schema>)` and explodes nested fields into typed columns in a separate table (e.g. `datausa_population_curated_flat`). Register the new schema in the Glue Catalog.",
+              "estimatedEffort": "2\u20134 days"
+            },
+            {
+              "priority": 3,
+              "owner": "Platform / DevOps Engineer",
+              "action": "Raise Glue job concurrency limit and add CloudWatch alerting for ConcurrentRunsExceededException",
+              "detail": "Set MaxConcurrentRuns to at least 5 for dqa-deequ-job. Add a CloudWatch alarm on job state = FAILED to notify on-call within 5 minutes.",
+              "estimatedEffort": "1\u20132 hours"
+            },
+            {
+              "priority": 4,
+              "owner": "Data Engineer \u2014 DQ / Governance",
+              "action": "Add a pre-flight schema-type guard to the DQ agent workflow",
+              "detail": "Add a Lambda/Step Functions pre-check that inspects the Glue Catalog schema and raises an alert \u2014 without launching the Spark job \u2014 if any STRING column name or sample value suggests serialised JSON.",
+              "estimatedEffort": "4\u20138 hours"
+            }
+          ],
+          "reRunGuidance": "Re-trigger dqa-deequ-agent against daa_curated.datausa_population_curated only after Priority 1 (Glue script patch to exclude `data` column) is deployed and smoke-tested. Full DQ coverage of the nested JSON payload requires Priority 2 (flattening transform) first.",
+          "planUri": "s3://dpa-123456789012-us-west-2/dq-remediation/datausa-population_20260520T044816Z_f6542f8903d3409290d2dfe9a797e102.json"
+        }
+      },
+      "summary": "ONE-SHOT DIAGNOSTIC VERDICT \u2014 SEVERITY: CRITICAL / STATUS: BLOCKED\n\nThe DQ run for daa_curated.datausa_population_curated is fully blocked \u2014 not a single Deequ constraint was ever evaluated. Two root causes were identified:\n\n\ud83d\udd34 RC-01 (Fatal): The `data` column is stored as STRING in the Glue Catalog but contains serialised JSON. When the Deequ ConstraintSuggestionRunner attempted to introspect it as a StructType, Spark threw an irrecoverable ClassCastException (StringType$ cannot be cast to StructType), crashing the entire Glue job before any DQ checks ran. This is the primary blocker.\n\n\ud83d\udfe0 RC-02 (Aggravating): The Glue job hit ConcurrentRunsExceededException on 22 consecutive attempts before finally getting a worker slot \u2014 only to then hit RC-01. This wasted significant compute budget and delayed failure detection by the pipeline.\n\nThe dataset is NOT fit-for-use: the curated Parquet layer is unverified and the DQ gate has NOT been cleared.\n\nPrioritised Remediation Path:\n  1. \u26a1 IMMEDIATE (2\u20134 hrs): Patch dqa-deequ-job to drop/exclude the `data` column before Deequ profiling. This unblocks DQ checks on all other columns right away.\n  2. \ud83d\udce6 SHORT-TERM (2\u20134 days): Build a JSON-flattening ETL job that explodes `data` into typed columns in a new table (`datausa_population_curated_flat`), enabling full DQ coverage of the nested payload.\n  3. \ud83d\udd27 QUICK WIN (1\u20132 hrs): Raise Glue MaxConcurrentRuns to \u22655 and add a CloudWatch alarm on job FAILED state to eliminate silent retry storms.\n  4. \ud83d\udee1 PREVENTIVE (4\u20138 hrs): Add a pre-flight schema guard (Lambda/Step Functions) that detects JSON-as-STRING columns before launching the expensive Spark job.\n\nRemediation plan saved to: s3://dpa-123456789012-us-west-2/dq-remediation/datausa-population_20260520T044816Z_f6542f8903d3409290d2dfe9a797e102.json"
+    },
+    "error": null
+  },
+  {
+    "test": "api-integration-agent",
+    "expected_agent": "api_integration_agent",
+    "agents_invoked": [
+      "aia_agent"
+    ],
+    "routing_pass": true,
+    "downstream_status": "status=active",
+    "elapsed_s": 79.0,
+    "data_required": true,
+    "raw": {
+      "plan": "The user requested a Lambda-based API ingestion pipeline for the Open-Meteo weather API, scheduled hourly. The aia_agent is the sole specialist for generating, deploying, and smoke-testing Lambda integrations from an API spec. I invoked it with the exact dataset name, a full description of the API contract, and the requested schedule expression.",
+      "agents_invoked": [
+        "aia_agent"
+      ],
+      "results": {
+        "aia_agent": {
+          "dataset": "weather",
+          "source": {
+            "endpoint": "https://api.open-meteo.com/v1/forecast",
+            "defaultQuery": "latitude=40.71&longitude=-74.01&hourly=temperature_2m",
+            "authType": "none",
+            "secretName": null
+          },
+          "lambda": {
+            "functionName": "aia-ing-weather",
+            "functionArn": "arn:aws:lambda:us-west-2:123456789012:function:aia-ing-weather"
+          },
+          "schedule": {
+            "ruleName": "aia-ing-weather",
+            "ruleArn": "arn:aws:events:us-west-2:123456789012:rule/aia-ing-weather",
+            "expression": "rate(1 hour)"
+          },
+          "landing": {
+            "bucket": "dpa-123456789012-us-west-2",
+            "prefix": "landing/weather/",
+            "sampleKey": "landing/weather/ingest_date=2026-05-31/hour=03/weather_20260531T035410Z_523338b6ae9d4dc0b3c4b61cca2ed923.json",
+            "objectCount": 9
+          },
+          "testRun": {
+            "statusCode": 200,
+            "ok": true,
+            "responseBody": {
+              "ok": true,
+              "key": "landing/weather/ingest_date=2026-05-31/hour=03/weather_20260531T035410Z_523338b6ae9d4dc0b3c4b61cca2ed923.json",
+              "bytes": 36320,
+              "record_count": 168
+            }
+          },
+          "codeUri": "s3://dpa-123456789012-us-west-2/api-integrations/code/weather/lambda_function.py",
+          "reportUri": "s3://dpa-123456789012-us-west-2/api-integrations/reports/weather.json",
+          "status": "active",
+          "notes": "Public Open-Meteo API \u2014 no authentication required. Each invocation fetches a 7-day hourly forecast for New York City (168 records per file), flattens the hourly block into individual temperature records, wraps them in a JSON envelope with ingest metadata, and writes to S3 with AES-256 SSE. Partitioned by ingest_date and hour. EventBridge triggers every hour. First live test ingested 168 records (36,320 bytes) successfully."
+        }
+      },
+      "summary": "\u2705 The 'weather' ingestion Lambda is live and already verified. Here's everything that was built and deployed:\n\n---\n\n**\ud83d\udd27 Lambda Function**\n- **Name:** `aia-ing-weather`\n- **ARN:** `arn:aws:lambda:us-west-2:123456789012:function:aia-ing-weather`\n- **Source code:** `s3://dpa-123456789012-us-west-2/api-integrations/code/weather/lambda_function.py`\n- **Auth:** None required (Open-Meteo is fully public)\n\n**\ud83d\udce1 API Source**\n- **Endpoint:** `https://api.open-meteo.com/v1/forecast`\n- **Query:** `latitude=40.71&longitude=-74.01&hourly=temperature_2m` (New York City, hourly 2m temperature)\n- Each call returns a **7-day forecast = 168 hourly records**\n\n**\u23f0 Schedule**\n- **EventBridge Rule:** `aia-ing-weather`\n- **Rule ARN:** `arn:aws:events:us-west-2:123456789012:rule/aia-ing-weather`\n- **Expression:** `rate(1 hour)` \u2014 fires every hour on the hour\n\n**\ud83e\udea3 Data Landing Zone (S3)**\n- **Bucket:** `dpa-123456789012-us-west-2`\n- **Prefix:** `landing/weather/`\n- **Partition scheme:** `ingest_date=YYYY-MM-DD/hour=HH/`\n- **Encryption:** AES-256 SSE\n- **Sample object:** `landing/weather/ingest_date=2026-05-31/hour=03/weather_20260531T035410Z_523338b6ae9d4dc0b3c4b61cca2ed923.json`\n\n**\u2705 Smoke Test Result**\n- **HTTP 200** \u2014 first live invocation succeeded\n- **168 records** written, **36,320 bytes** deposited to S3\n- 9 objects already present in the landing prefix\n\n**\ud83d\udcc4 Full Report:** `s3://dpa-123456789012-us-west-2/api-integrations/reports/weather.json`\n\nThe pipeline is fully operational. Every hour, the Lambda will pull the latest Open-Meteo forecast for NYC, flatten it into 168 per-hour temperature records, and land them in S3 \u2014 ready for profiling, schema design, or quality checks downstream."
+    },
+    "error": null
+  },
+  {
+    "test": "log-analysis-agent",
+    "expected_agent": "log_analysis_agent",
+    "agents_invoked": [],
+    "routing_pass": false,
+    "downstream_status": "exception: Read timeout on endpoint URL: \"https://bedrock-agentcore.us-east-1.amazonaws.com",
+    "elapsed_s": 14630.8,
+    "data_required": true,
+    "raw": null,
+    "error": "Read timeout on endpoint URL: \"https://bedrock-agentcore.us-east-1.amazonaws.com/runtimes/arn%3Aaws%3Abedrock-agentcore%3Aus-east-1%3A123456789012%3Aruntime%2Fdeo_agent-rk1WdmFsMH/invocations?qualifier=DEFAULT\""
+  },
+  {
+    "test": "text-to-dag-agent",
+    "expected_agent": "text_to_dag_agent",
+    "agents_invoked": [],
+    "routing_pass": false,
+    "downstream_status": "exception: Read timeout on endpoint URL: \"https://bedrock-agentcore.us-east-1.amazonaws.com",
+    "elapsed_s": 14625.1,
+    "data_required": false,
+    "raw": null,
+    "error": "Read timeout on endpoint URL: \"https://bedrock-agentcore.us-east-1.amazonaws.com/runtimes/arn%3Aaws%3Abedrock-agentcore%3Aus-east-1%3A123456789012%3Aruntime%2Fdeo_agent-rk1WdmFsMH/invocations?qualifier=DEFAULT\""
+  },
+  {
+    "test": "sql-evaluations-agent",
+    "expected_agent": "sql_evaluations_agent",
+    "agents_invoked": [
+      "sql_evaluations_agent"
+    ],
+    "routing_pass": true,
+    "downstream_status": "status=revised",
+    "elapsed_s": 31.4,
+    "data_required": false,
+    "raw": {
+      "plan": "The user submitted a SQL query for review. I routed it to sql_evaluations_agent (SQL Evaluations) which checks for correctness, performance, and security issues.",
+      "agents_invoked": [
+        "sql_evaluations_agent"
+      ],
+      "results": {
+        "sql_evaluations_agent": {
+          "status": "revised",
+          "findings": {
+            "errors": [],
+            "optimizations": [
+              {
+                "severity": "medium",
+                "issue": "SELECT * materializes every column unnecessarily, increasing I/O and memory cost.",
+                "fix": "Replace * with only the columns actually needed (e.g., id, name)."
+              },
+              {
+                "severity": "medium",
+                "issue": "LIKE '%a%' uses a leading wildcard, which prevents any B-tree index seek on the `name` column and forces a full table scan.",
+                "fix": "If prefix matching is acceptable, use LIKE 'a%' to allow index usage. For arbitrary substring search, consider a full-text index or search extension."
+              },
+              {
+                "severity": "medium",
+                "issue": "No LIMIT clause \u2014 on a large users table, this can return an unbounded result set.",
+                "fix": "Add LIMIT 100 (or an appropriate page size) for exploratory or application queries."
+              }
+            ],
+            "security": [
+              {
+                "severity": "medium",
+                "issue": "SELECT * on a `users` table risks exposing PII and sensitive columns (e.g., password hashes, emails, SSNs) to any consumer of this query.",
+                "fix": "Explicitly enumerate only the non-sensitive columns required and exclude credential or PII fields."
+              }
+            ]
+          },
+          "revised_sql": "-- TODO: replace id, name with the exact columns needed; avoid sensitive fields (e.g. password, ssn, email)\nSELECT id, name\nFROM users\nWHERE name LIKE '%a%'\nLIMIT 100;"
+        }
+      },
+      "summary": "The SQL agent reviewed your query and found **no syntax errors**, but raised **3 performance issues** and **1 security concern**, all rated medium severity:\n\n---\n\n### \u26a0\ufe0f Performance Issues\n\n1. **`SELECT *` \u2014 Avoid selecting all columns.**\n   Materializing every column wastes I/O and memory. Explicitly name only the columns you need.\n\n2. **Leading wildcard `LIKE '%a%'` \u2014 Forces a full table scan.**\n   A leading `%` prevents B-tree indexes from being used on the `name` column. Consider:\n   - Using `LIKE 'a%'` (prefix only) if that fits your use case \u2014 this allows index seeks.\n   - Using a **full-text index** (e.g., `FULLTEXT` in MySQL, `tsvector` in PostgreSQL, or `CONTAINS` in SQL Server) for true substring searches.\n\n3. **No `LIMIT` clause \u2014 Unbounded result set.**\n   On a large `users` table, this could return millions of rows. Add a `LIMIT` for safety.\n\n---\n\n### \ud83d\udd12 Security Issue\n\n4. **`SELECT *` on a `users` table exposes PII.**\n   Columns like `password`, `email`, `ssn`, or `dob` may be returned unintentionally. Always enumerate only the safe, required columns.\n\n---\n\n### \u2705 Revised SQL\n```sql\n-- Replace id, name with the exact columns needed; avoid sensitive fields (e.g. password, ssn, email)\nSELECT id, name\nFROM users\nWHERE name LIKE '%a%'\nLIMIT 100;\n```"
+    },
+    "error": null
+  },
+  {
+    "test": "sales-reporting",
+    "expected_agent": "sales_reporting_agent",
+    "agents_invoked": [
+      "sales_reporting_agent"
+    ],
+    "routing_pass": true,
+    "downstream_status": "response: {\"summary\": \"Total Q3 sales by region across the sales schema:\", \"data\": [{\"rank\u2026",
+    "elapsed_s": 2648.2,
+    "data_required": true,
+    "raw": {
+      "plan": "The user asked a natural language sales question against the Redshift sales schema. I routed this directly to the sales_reporting_agent, which is purpose-built for NL queries against that schema.",
+      "agents_invoked": [
+        "sales_reporting_agent"
+      ],
+      "results": {
+        "sales_reporting_agent": {
+          "summary": "Total Q3 sales by region across the sales schema:",
+          "data": [
+            {
+              "rank": 1,
+              "region": "GM-Each Region",
+              "country": "Angola",
+              "total_sales": "$22,523,171.08",
+              "orders": 980
+            },
+            {
+              "rank": 2,
+              "region": "MN-Machine Region",
+              "country": "Syrian Arab Republic",
+              "total_sales": "$19,238,672.31",
+              "orders": 874
+            },
+            {
+              "rank": 3,
+              "region": "MU-Food Region",
+              "country": "Spain",
+              "total_sales": "$12,506,592.67",
+              "orders": 529
+            },
+            {
+              "rank": 4,
+              "region": "CZ-Situation Region",
+              "country": "Macao",
+              "total_sales": "$3,643,248.83",
+              "orders": 152
+            }
+          ]
+        }
+      },
+      "summary": "Here are your total Q3 sales by region:\n\n| Rank | Region | Country | Total Sales | Orders |\n|------|--------|---------|-------------|--------|\n| 1 | GM-Each Region | Angola | $22,523,171.08 | 980 |\n| 2 | MN-Machine Region | Syrian Arab Republic | $19,238,672.31 | 874 |\n| 3 | MU-Food Region | Spain | $12,506,592.67 | 529 |\n| 4 | CZ-Situation Region | Macao | $3,643,248.83 | 152 |\n\n**Key Takeaways:**\n- **Total Q3 Revenue: ~$57.9M** across all regions.\n- **GM-Each Region (Angola)** leads at $22.5M (980 orders) \u2014 ~39% of total Q3 revenue.\n- **MN-Machine Region (Syria)** is a close second at $19.2M (874 orders).\n- Together, the top two regions account for ~75% of all Q3 sales.\n- **CZ-Situation Region (Macao)** significantly underperforms at $3.6M \u2014 worth investigating for coverage gaps, product fit, or seasonal factors."
+    },
+    "error": null
+  },
+  {
+    "test": "redshift-mcp-capability",
+    "expected_agent": "(none \u2014 capability)",
+    "agents_invoked": [
+      "sales_reporting_agent"
+    ],
+    "routing_pass": true,
+    "downstream_status": "n/a (capability surfaced, not invoked)",
+    "elapsed_s": 1095.4,
+    "data_required": true,
+    "raw": {
+      "plan": "The user asked two Redshift schema-discovery questions: (1) list all tables in salesdb and (2) describe the columns of sales_fact. redshift_mcp_server_agentcore is 'capability only' and cannot be invoked as JSON, so both questions were fanned out in parallel to sales_reporting_agent, which uses the MCP tools under the hood.",
+      "agents_invoked": [
+        "sales_reporting_agent"
+      ],
+      "results": {
+        "sales_reporting_agent": {
+          "tables_in_salesdb": {
+            "dimension_tables": [
+              "dim_account",
+              "dim_district",
+              "dim_dma",
+              "dim_product",
+              "dim_region",
+              "dim_sales_rep",
+              "dim_sales_territory",
+              "dim_time",
+              "dim_zipcode"
+            ],
+            "fact_tables": [
+              "fact_sales"
+            ],
+            "views": [
+              "sales_simple",
+              "sales_comprehensive",
+              "v_monthly_sales",
+              "v_product_performance"
+            ]
+          },
+          "sales_fact_columns": {
+            "note": "The central fact table is named fact_sales (not sales_fact). Its columns are:",
+            "keys_and_foreign_keys": [
+              "sales_key",
+              "order_id",
+              "order_date_key",
+              "ship_date_key",
+              "account_key",
+              "product_key",
+              "sales_rep_key",
+              "territory_key",
+              "district_key",
+              "region_key",
+              "zipcode_key",
+              "dma_key"
+            ],
+            "measures": [
+              "quantity",
+              "unit_price",
+              "unit_cost",
+              "discount_pct",
+              "sales_amount",
+              "profit_amount"
+            ],
+            "flags": [
+              "return_flag",
+              "online_order_flag"
+            ]
+          }
+        }
+      },
+      "summary": "The salesdb cluster (sales schema) contains 14 objects total:\n\n**9 Dimension Tables:** dim_account, dim_district, dim_dma, dim_product, dim_region, dim_sales_rep, dim_sales_territory, dim_time, dim_zipcode.\n\n**1 Fact Table:** fact_sales (note: the table is named fact_sales, not sales_fact).\n\n**4 Views:** sales_simple, sales_comprehensive, v_monthly_sales, v_product_performance.\n\n---\n\n**fact_sales columns:**\n\n| Column | Role |\n|---|---|\n| sales_key | Surrogate PK |\n| order_id | Natural order identifier |\n| order_date_key, ship_date_key | FK \u2192 dim_time |\n| account_key | FK \u2192 dim_account |\n| product_key | FK \u2192 dim_product |\n| sales_rep_key | FK \u2192 dim_sales_rep |\n| territory_key | FK \u2192 dim_sales_territory |\n| district_key | FK \u2192 dim_district |\n| region_key | FK \u2192 dim_region |\n| zipcode_key | FK \u2192 dim_zipcode |\n| dma_key | FK \u2192 dim_dma |\n| quantity | Measure \u2014 units sold |\n| unit_price | Measure \u2014 selling price per unit |\n| unit_cost | Measure \u2014 cost per unit |\n| discount_pct | Measure \u2014 discount percentage |\n| sales_amount | Measure \u2014 total revenue |\n| profit_amount | Measure \u2014 total profit |\n| return_flag | Flag \u2014 was the order returned? |\n| online_order_flag | Flag \u2014 was it an online order? |\n\nThis is a classic **star-schema** fact table with 12 dimension keys and 6 numeric measures, making it the hub for all sales analytics in salesdb."
+    },
+    "error": null
+  }
+]

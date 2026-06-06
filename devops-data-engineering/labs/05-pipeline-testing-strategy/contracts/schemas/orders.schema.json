@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OrdersAPIResponse",
+  "type": "object",
+  "required": ["orders"],
+  "properties": {
+    "orders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["order_id", "customer_id", "total", "status"],
+        "properties": {
+          "order_id":    { "type": "integer" },
+          "customer_id": { "type": "string" },
+          "total":       { "type": "number", "minimum": 0 },
+          "status":      { "type": "string", "enum": ["paid", "cancelled", "refunded"] },
+          "currency":    { "type": "string", "pattern": "^[A-Z]{3}$" }
+        }
+      }
+    }
+  }
+}

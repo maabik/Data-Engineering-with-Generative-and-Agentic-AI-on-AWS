@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bedrock-audit-trail"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "aws-cdk-lib>=2.130.0",
+    "constructs>=10.0.0",
+    "boto3>=1.34.0",
+]
+
+[project.optional-dependencies]
+lambda = [
+    "boto3>=1.34.0",
+]
+trace = [
+    "boto3>=1.34.0",
+]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-mock>=3.12.0",
+    "moto[s3,firehose,kms,comprehend,glue]>=5.0.0",
+    "freezegun>=1.4.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["lambda*", "trace_client*", "cdk*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

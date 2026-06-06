@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knowledge-graph-agent"
+version = "0.1.0"
+description = "GraphRAG on Amazon Neptune Analytics with Bedrock, S3 Vectors, AgentCore Runtime, and Strands Agents"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Justin Leto" }]
+
+dependencies = [
+    "boto3>=1.35",
+    "botocore>=1.35",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.4",
+    "tenacity>=9.0",
+    "structlog>=24.4",
+    "aws-requests-auth>=0.4.3",
+]
+
+[project.optional-dependencies]
+mcp = [
+    "mcp",
+    "bedrock-agentcore",
+    "bedrock-agentcore-starter-toolkit",
+]
+agent = [
+    "strands-agents",
+    "PyJWT>=2.8",
+]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.23",
+    "moto[all]>=5.0",
+    "ruff>=0.6",
+    "mypy>=1.10",
+]
+cdk = [
+    "aws-cdk-lib>=2.150",
+    "constructs>=10.3",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-ra -q"

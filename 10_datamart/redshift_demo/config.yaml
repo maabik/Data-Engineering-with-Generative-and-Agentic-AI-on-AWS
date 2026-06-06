@@ -1,0 +1,46 @@
+# Amazon Redshift Sales Demo Configuration
+
+# AWS Configuration
+aws:
+  region: us-east-1
+  
+# Redshift Cluster Configuration
+redshift:
+  cluster_identifier: sales-demo-cluster
+  node_type: ra3.4xlarge
+  number_of_nodes: 2
+  master_username: admin
+  # master_password is intentionally not set here.
+  # Provide it at deploy time via the MASTER_PASSWORD env var, or let the
+  # deploy script generate one and store it in AWS Secrets Manager.
+  database_name: salesdb
+  port: 5439
+  publicly_accessible: false
+  encrypted: true
+
+# IAM Configuration
+iam:
+  role_name: RedshiftSalesDemo
+  
+# S3 Configuration
+s3:
+  bucket_prefix: sales-demo-data
+  data_path: data/
+  
+# Data Generation Configuration
+data_generation:
+  start_date: "2020-01-01"
+  end_date: "2024-12-31"
+  num_accounts: 100
+  num_regions: 5
+  num_districts: 10
+  num_territories: 20
+  num_zipcodes: 50
+  num_dmas: 20
+  num_products: 50
+  num_sales_reps: 20
+  num_sales_records: 10000
+
+# Schema Configuration
+schema:
+  name: sales

@@ -1,0 +1,60 @@
+items:
+  - from_level: 1
+    title: "Stand up scheduled batch ingestion (Glue or MWAA) for top sources"
+    impact: 5
+    effort: M
+    aws_services: [AWS Glue, Amazon MWAA]
+    book_reference: "Chapter 5 — Big Data Processing with AWS Glue and AI Agents"
+    why_it_matters: |
+      Manual loads always rot. A scheduled, observable batch path is the
+      starting point for trustworthy data.
+    steps:
+      - "Pick top-5 sources; build Glue jobs with scheduled triggers."
+      - "Partition target tables on natural date keys."
+    acceptance_criteria:
+      - "5 scheduled triggers active; partition pruning verified."
+
+  - from_level: 2
+    title: "Add CDC/incremental ingestion (DMS or Kinesis) for relational sources"
+    impact: 4
+    effort: M
+    aws_services: [AWS DMS, Amazon Kinesis]
+    book_reference: "Chapter 5 + Chapter 9 — Streaming and Real-Time Data Processing"
+    why_it_matters: |
+      Full table reloads scale poorly past 10M rows. CDC is how you stop your
+      lake from being a nightly snapshot graveyard.
+    steps:
+      - "Stand up DMS replication tasks for the top 3 relational sources."
+      - "Land CDC events to bronze; merge into silver Iceberg tables."
+    acceptance_criteria:
+      - "≥3 DMS tasks running with sub-15-minute lag."
+
+  - from_level: 3
+    title: "Add Firehose → Iceberg/S3 Tables streaming path for hot data"
+    impact: 4
+    effort: M
+    aws_services: [Amazon Data Firehose, Amazon S3 Tables, Apache Iceberg]
+    book_reference: "Chapter 9 — Streaming and Real-Time Data Processing"
+    why_it_matters: |
+      Sub-minute analytics and real-time agent use cases require streaming
+      writes. Firehose now lands directly into Iceberg/S3 Tables.
+    steps:
+      - "Identify 1-2 streams (events, clickstream, audit) to migrate."
+      - "Configure Firehose with Iceberg destination; set buffering hints."
+    acceptance_criteria:
+      - "≥1 Firehose delivery stream landing into S3 Tables / Iceberg."
+
+  - from_level: 4
+    title: "Add Athena materialized views and query result reuse"
+    impact: 3
+    effort: S
+    aws_services: [Amazon Athena]
+    book_reference: "Chapter 5 — Big Data Processing with AWS Glue and AI Agents"
+    why_it_matters: |
+      Cheap acceleration on top of an open lake. MVs and result reuse cut
+      query cost without architecture change.
+    steps:
+      - "Identify top 3 query patterns; create MVs."
+      - "Enable result reuse on the analyst workgroup."
+    acceptance_criteria:
+      - "Top-3 patterns drop ≥40% in p95 latency."

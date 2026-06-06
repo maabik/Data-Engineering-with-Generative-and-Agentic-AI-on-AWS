@@ -1,0 +1,28 @@
+tables:
+  - s3://apache-iceberg-us-east-1-123456789012/iceberg/maintenance_test
+
+catalog:
+  type: glue
+  properties:
+    glue.region: us-east-1
+    region_name: us-east-1
+
+thresholds:
+  compaction:
+    small_file_size_mb: 128
+    small_file_count_threshold: 5
+    small_file_ratio_threshold: 0.3
+  snapshots:
+    max_snapshots: 10
+    retention_hours: 1
+  orphans:
+    age_hours: 1
+
+monitoring:
+  mode: on-demand
+
+aws:
+  region: us-east-1
+
+anthropic_model: us.anthropic.claude-sonnet-4-6
+dry_run: false   # LIVE — real changes will be made

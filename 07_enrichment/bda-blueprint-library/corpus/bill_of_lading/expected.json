@@ -1,0 +1,41 @@
+{
+  "bol_number": "BOL-998341",
+  "bol_date": "2024-08-22",
+  "carrier_name": "Pacific West Freight Lines",
+  "carrier_scac": "PWFL",
+  "shipper_name": "Cascade Manufacturing Co.",
+  "shipper_address": "4400 Industrial Pkwy, Tacoma, WA 98424",
+  "consignee_name": "Sunbelt Distributors LLC",
+  "consignee_address": "8210 South Loop, Houston, TX 77033",
+  "third_party_billing": "Cascade Manufacturing Co.",
+  "freight_terms": "Prepaid",
+  "pro_number": "PWFL-7710-44",
+  "trailer_number": "PWFL-204918",
+  "seal_number": "SEAL-44217",
+  "total_packages": 24,
+  "total_weight": 6800.0,
+  "hazmat": false,
+  "items": [
+    {
+      "description": "Cardboard boxes - small electronics",
+      "package_count": 12,
+      "weight": 2400.0,
+      "weight_unit": "LB",
+      "nmfc_class": "92.5"
+    },
+    {
+      "description": "Wooden crates - industrial valves",
+      "package_count": 8,
+      "weight": 3200.0,
+      "weight_unit": "LB",
+      "nmfc_class": "70"
+    },
+    {
+      "description": "Pallets - replacement parts",
+      "package_count": 4,
+      "weight": 1200.0,
+      "weight_unit": "LB",
+      "nmfc_class": "85"
+    }
+  ]
+}

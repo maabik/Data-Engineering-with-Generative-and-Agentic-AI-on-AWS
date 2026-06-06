@@ -1,0 +1,6 @@
+{
+  "agent_arn": "arn:aws:bedrock-agentcore:us-east-1:123456789012:runtime/redshift_mcp_http_server-XXXXXXXXXX",
+  "tool_name": "redshift_execute_query",
+  "credentials_secret": "cognito-mcp-credentials",
+  "region": "us-east-1"
+}

@@ -1,0 +1,23 @@
+# Checkov config for the reference pipeline. Tighten progressively.
+# Run with: checkov -d reference-pipeline/terraform/ --config-file labs/04-policy-as-code/.checkov.yaml
+framework: terraform
+quiet: true
+compact: true
+
+# Soft-fail noisy checks during initial rollout; tighten over time.
+soft-fail-on:
+  - CKV_AWS_18    # Access logging on S3 — sandbox is fine without
+  - CKV_AWS_144   # Cross-region replication — not for sandbox
+
+# Hard-fail on these, no exceptions:
+hard-fail-on:
+  - CKV_AWS_19    # SSE on S3 buckets
+  - CKV_AWS_53    # Block public ACLs
+  - CKV_AWS_54    # Block public policies
+  - CKV_AWS_55    # Ignore public ACLs
+  - CKV_AWS_56    # Restrict public buckets
+  - CKV_AWS_111   # IAM Action wildcards (paired with Rego rule above)
+  - CKV2_AWS_6    # Public access block on S3 buckets
+
+skip-check:
+  - CKV_AWS_158   # CloudWatch log group KMS encryption — opt in once KMS keys are wired

@@ -1,0 +1,77 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "RedshiftClusterIntrospection",
+            "Effect": "Allow",
+            "Action": [
+                "redshift:DescribeClusters",
+                "redshift:DescribeClusterParameters"
+            ],
+            "Resource": [
+                "arn:aws:redshift:*:*:cluster:sales-demo-cluster",
+                "arn:aws:redshift:*:*:parametergroup:*"
+            ]
+        },
+        {
+            "Sid": "RedshiftServerlessIntrospection",
+            "Effect": "Allow",
+            "Action": [
+                "redshift-serverless:GetWorkgroup",
+                "redshift-serverless:GetNamespace"
+            ],
+            "Resource": [
+                "arn:aws:redshift-serverless:*:*:workgroup/*",
+                "arn:aws:redshift-serverless:*:*:namespace/*"
+            ]
+        },
+        {
+            "Sid": "RedshiftServerlessList",
+            "Effect": "Allow",
+            "Action": [
+                "redshift-serverless:ListWorkgroups",
+                "redshift-serverless:ListNamespaces"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "RedshiftDataExecuteAndIntrospect",
+            "Effect": "Allow",
+            "Action": [
+                "redshift-data:ExecuteStatement",
+                "redshift-data:ListDatabases",
+                "redshift-data:ListSchemas",
+                "redshift-data:ListTables",
+                "redshift-data:DescribeTable"
+            ],
+            "Resource": [
+                "arn:aws:redshift:*:*:cluster:sales-demo-cluster",
+                "arn:aws:redshift-serverless:*:*:workgroup/*"
+            ]
+        },
+        {
+            "Sid": "RedshiftDataStatementResultsRequiresStar",
+            "Effect": "Allow",
+            "Action": [
+                "redshift-data:DescribeStatement",
+                "redshift-data:GetStatementResult"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "EcrPullForAgentCoreImage",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:BatchGetImage",
+                "ecr:GetDownloadUrlForLayer"
+            ],
+            "Resource": "arn:aws:ecr:*:*:repository/redshift_mcp_*"
+        },
+        {
+            "Sid": "EcrAuthRequiresStar",
+            "Effect": "Allow",
+            "Action": "ecr:GetAuthorizationToken",
+            "Resource": "*"
+        }
+    ]
+}

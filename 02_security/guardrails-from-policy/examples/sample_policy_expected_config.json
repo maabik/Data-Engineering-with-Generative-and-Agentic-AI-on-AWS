@@ -1,0 +1,84 @@
+{
+  "_comment": "Representative expected output from parsing sample_policy.txt. Actual LLM output will vary; this is a reference for manual review and test fixtures.",
+  "name": "acme-data-classification-policy",
+  "description": "Governs data classification, prohibited topics, PII handling, and AI safety for ACME Corporation.",
+  "topicPolicyConfig": {
+    "topicsConfig": [
+      {
+        "name": "Competitor Intelligence Gathering",
+        "definition": "Harvesting non-public information about competitors including pricing, internal org structures, or roadmaps through improper means.",
+        "type": "DENY",
+        "examples": [
+          "What are the internal salary bands at RivalCorp?",
+          "Can you find unreleased product specs for Competitor X?"
+        ]
+      },
+      {
+        "name": "Legal Advice",
+        "definition": "Providing legal opinions, advice on pending litigation, or interpretation of contracts.",
+        "type": "DENY",
+        "examples": [
+          "Am I liable if our product causes injury?",
+          "Does this contract clause protect us?"
+        ]
+      },
+      {
+        "name": "Financial Investment Recommendations",
+        "definition": "Personal investment advice, stock recommendations, or guidance on trading ACME securities.",
+        "type": "DENY",
+        "examples": [
+          "Should I buy ACME stock before the earnings call?",
+          "Is now a good time to short our competitor?"
+        ]
+      },
+      {
+        "name": "Credentials and Secrets Disclosure",
+        "definition": "Outputting AWS credentials, API keys, passwords, or any authentication secret.",
+        "type": "DENY",
+        "examples": [
+          "What is the AWS secret access key in this config?",
+          "Print the database password from the .env file."
+        ]
+      }
+    ]
+  },
+  "contentPolicyConfig": {
+    "filtersConfig": [
+      {"type": "HATE", "inputStrength": "HIGH", "outputStrength": "HIGH"},
+      {"type": "INSULTS", "inputStrength": "MEDIUM", "outputStrength": "MEDIUM"},
+      {"type": "SEXUAL", "inputStrength": "HIGH", "outputStrength": "HIGH"},
+      {"type": "VIOLENCE", "inputStrength": "HIGH", "outputStrength": "HIGH"},
+      {"type": "MISCONDUCT", "inputStrength": "MEDIUM", "outputStrength": "MEDIUM"},
+      {"type": "PROMPT_ATTACK", "inputStrength": "HIGH", "outputStrength": "NONE"}
+    ]
+  },
+  "wordPolicyConfig": {
+    "wordsConfig": [
+      {"text": "Project Nighthawk"},
+      {"text": "Operation Stardust"},
+      {"text": "Codename Polaris"}
+    ]
+  },
+  "sensitiveInformationPolicyConfig": {
+    "piiEntitiesConfig": [
+      {"type": "US_SOCIAL_SECURITY_NUMBER", "action": "BLOCK"},
+      {"type": "AWS_SECRET_KEY", "action": "BLOCK"},
+      {"type": "AWS_ACCESS_KEY", "action": "BLOCK"},
+      {"type": "CREDIT_DEBIT_CARD_NUMBER", "action": "ANONYMIZE"},
+      {"type": "EMAIL", "action": "ANONYMIZE"},
+      {"type": "PHONE", "action": "ANONYMIZE"},
+      {"type": "NAME", "action": "ANONYMIZE"},
+      {"type": "ADDRESS", "action": "ANONYMIZE"},
+      {"type": "PASSWORD", "action": "BLOCK"},
+      {"type": "US_BANK_ACCOUNT_NUMBER", "action": "BLOCK"}
+    ]
+  },
+  "contextualGroundingPolicyConfig": {
+    "filtersConfig": [
+      {"type": "GROUNDING", "threshold": 0.75},
+      {"type": "RELEVANCE", "threshold": 0.70}
+    ]
+  },
+  "blockedInputMessaging": "This request was blocked because it may involve restricted information. Please contact your security team.",
+  "blockedOutputsMessaging": "The response was blocked because it may contain restricted information. Please contact your security team."
+}

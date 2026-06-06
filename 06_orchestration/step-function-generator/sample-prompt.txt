@@ -1,0 +1,14 @@
+Generate an AWS Step Functions state machine that orchestrates an AWS Glue job.
+
+Requirements:
+- A single Task state named "RunIngestJob" that synchronously runs an AWS Glue job
+  using the service integration arn:aws:states:::glue:startJobRun.sync.
+- Pass the input field `JobName` (string) as the Glue job name and `Arguments`
+  (object) as the job arguments.
+- On failure, retry up to 2 times with 30 second initial backoff, exponential
+  backoff factor 2.0, on the error type "States.TaskFailed".
+- On unrecoverable failure, transition to a Fail state named "JobFailed" with
+  Cause "Glue job failed".
+- On success, transition to a Succeed state named "Done".
+
+Return only the Amazon States Language JSON definition.

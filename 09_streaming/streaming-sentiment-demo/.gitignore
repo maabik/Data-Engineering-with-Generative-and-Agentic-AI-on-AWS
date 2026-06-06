@@ -1,0 +1,16 @@
+*.js
+!jest.config.js
+*.d.ts
+node_modules
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+cdk.context.json
+outputs.json
+
+# Maven build output (Flink job jar)
+target/
+.mvn/
+*.class
+

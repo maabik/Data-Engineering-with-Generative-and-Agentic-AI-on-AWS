@@ -1,0 +1,251 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Text-to-SQL API using Amazon Bedrock and Redshift Data API'
+
+Parameters:
+  RedshiftClusterIdentifier:
+    Type: String
+    Description: Redshift cluster identifier
+    Default: sales-demo-cluster
+
+  RedshiftDatabase:
+    Type: String
+    Description: Redshift database name
+    Default: salesdb
+
+  RedshiftUsername:
+    Type: String
+    Description: Redshift username
+    Default: admin
+
+  RedshiftPassword:
+    Type: String
+    Description: Redshift master user password (provided at deploy time, never committed)
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 64
+
+  PromptTemplateId:
+    Type: String
+    Description: DynamoDB prompt template ID
+    Default: redshift-sales-schema
+
+  TextToSqlAgent:
+    Type: String
+    Description: Bedrock TextToSQL Agent ID (no default; create the agent first)
+    MinLength: 1
+
+  TextToSqlAgentAlias:
+    Type: String
+    Description: Bedrock TextToSQL Agent Alias ID (no default; create the alias first)
+    MinLength: 1
+
+  FallbackModelId:
+    Type: String
+    Description: Bedrock model ID used when the agent fails. Cross-region inference profile recommended.
+    Default: us.anthropic.claude-sonnet-4-6
+
+Resources:
+  PromptTemplateTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: TextToSqlPromptTemplates
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+
+  RedshiftSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: redshift-text-to-sql-credentials
+      Description: Redshift credentials for text-to-SQL API
+      SecretString: !Sub |
+        {
+          "cluster_identifier": "${RedshiftClusterIdentifier}",
+          "database": "${RedshiftDatabase}",
+          "username": "${RedshiftUsername}",
+          "password": "${RedshiftPassword}"
+        }
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: TextToSqlPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                  - bedrock:InvokeModelWithResponseStream
+                Resource:
+                  - !Sub 'arn:aws:bedrock:*::foundation-model/anthropic.claude-sonnet-4-6'
+                  - !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/us.anthropic.claude-sonnet-4-6'
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeAgent
+                Resource:
+                  - !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:agent-alias/${TextToSqlAgent}/${TextToSqlAgentAlias}'
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                Resource: !GetAtt PromptTemplateTable.Arn
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref RedshiftSecret
+              - Effect: Allow
+                Action:
+                  - redshift-data:ExecuteStatement
+                  - redshift-data:DescribeStatement
+                  - redshift-data:GetStatementResult
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - redshift:GetClusterCredentials
+                Resource:
+                  - !Sub 'arn:aws:redshift:${AWS::Region}:${AWS::AccountId}:cluster:${RedshiftClusterIdentifier}'
+                  - !Sub 'arn:aws:redshift:${AWS::Region}:${AWS::AccountId}:dbname:${RedshiftClusterIdentifier}/${RedshiftDatabase}'
+                  - !Sub 'arn:aws:redshift:${AWS::Region}:${AWS::AccountId}:dbuser:${RedshiftClusterIdentifier}/${RedshiftUsername}'
+
+  TextToSqlFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: TextToSqlFunction
+      Runtime: python3.12
+      Handler: text_to_sql_lambda.lambda_handler
+      Code:
+        ZipFile: |
+          # Placeholder; deploy_text_to_sql.py uploads the real package via update_function_code.
+          import json
+          def lambda_handler(event, context):
+              return {
+                  'statusCode': 200,
+                  'body': json.dumps({'message': 'Function needs to be updated with actual code'})
+              }
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 300
+      Environment:
+        Variables:
+          PROMPT_TEMPLATE_TABLE: !Ref PromptTemplateTable
+          PROMPT_TEMPLATE_ID: !Ref PromptTemplateId
+          REDSHIFT_SECRET_ARN: !Ref RedshiftSecret
+          TEXT_TO_SQL_AGENT_ID: !Ref TextToSqlAgent
+          TEXT_TO_SQL_AGENT_ALIAS_ID: !Ref TextToSqlAgentAlias
+          FALLBACK_MODEL_ID: !Ref FallbackModelId
+
+  TextToSqlApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: TextToSqlApi
+      Description: API for text-to-SQL conversion
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  QueryResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref TextToSqlApi
+      ParentId: !GetAtt TextToSqlApi.RootResourceId
+      PathPart: query
+
+  QueryMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref TextToSqlApi
+      ResourceId: !Ref QueryResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TextToSqlFunction.Arn}/invocations'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Headers: true
+
+  QueryOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref TextToSqlApi
+      ResourceId: !Ref QueryResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - QueryMethod
+      - QueryOptionsMethod
+    Properties:
+      RestApiId: !Ref TextToSqlApi
+      StageName: prod
+
+  LambdaApiGatewayPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref TextToSqlFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TextToSqlApi}/*/POST/query'
+
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !Sub 'https://${TextToSqlApi}.execute-api.${AWS::Region}.amazonaws.com/prod/query'
+    Export:
+      Name: !Sub '${AWS::StackName}-ApiEndpoint'
+
+  LambdaFunctionName:
+    Description: Lambda function name
+    Value: !Ref TextToSqlFunction
+    Export:
+      Name: !Sub '${AWS::StackName}-LambdaFunction'
+
+  PromptTemplateTableName:
+    Description: DynamoDB table name for prompt templates
+    Value: !Ref PromptTemplateTable
+    Export:
+      Name: !Sub '${AWS::StackName}-PromptTemplateTable'
+
+  RedshiftSecretArn:
+    Description: ARN of the Redshift credentials secret
+    Value: !Ref RedshiftSecret
+    Export:
+      Name: !Sub '${AWS::StackName}-RedshiftSecret'

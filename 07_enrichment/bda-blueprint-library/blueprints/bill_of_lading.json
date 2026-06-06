@@ -1,0 +1,124 @@
+{
+  "class": "BillOfLading",
+  "description": "Carrier-issued Bill of Lading (BoL) covering goods accepted for transport. Captures parties, references, freight terms, and itemized goods.",
+  "definitions": {
+    "GOODS_LINE": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "inferenceType": "explicit",
+          "instruction": "Description of the goods, commodity, or NMFC class"
+        },
+        "package_count": {
+          "type": "number",
+          "inferenceType": "explicit",
+          "instruction": "Number of handling units / packages"
+        },
+        "weight": {
+          "type": "number",
+          "inferenceType": "explicit",
+          "instruction": "Total weight for the line"
+        },
+        "weight_unit": {
+          "type": "string",
+          "inferenceType": "explicit",
+          "instruction": "Weight unit (LB or KG)"
+        },
+        "nmfc_class": {
+          "type": "string",
+          "inferenceType": "explicit",
+          "instruction": "NMFC freight class if shown"
+        }
+      }
+    }
+  },
+  "properties": {
+    "bol_number": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Bill of Lading number"
+    },
+    "bol_date": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Date the BoL was issued"
+    },
+    "carrier_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Name of the carrier transporting the goods"
+    },
+    "carrier_scac": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Standard Carrier Alpha Code (SCAC) if present"
+    },
+    "shipper_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Name of the shipper / consignor"
+    },
+    "shipper_address": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Pickup / origin address"
+    },
+    "consignee_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Name of the consignee receiving the goods"
+    },
+    "consignee_address": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Delivery / destination address"
+    },
+    "third_party_billing": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Third party billed for freight charges, if any"
+    },
+    "freight_terms": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Prepaid, Collect, or Third-Party"
+    },
+    "pro_number": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Carrier PRO / tracking number"
+    },
+    "trailer_number": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Trailer or container number"
+    },
+    "seal_number": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Seal number affixed to the trailer"
+    },
+    "total_packages": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Total package / handling unit count for the shipment"
+    },
+    "total_weight": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Total weight of the shipment"
+    },
+    "hazmat": {
+      "type": "boolean",
+      "inferenceType": "explicit",
+      "instruction": "Whether the shipment is marked as hazardous material"
+    },
+    "items": {
+      "type": "array",
+      "instruction": "Goods lines on the BoL",
+      "items": {
+        "$ref": "#/definitions/GOODS_LINE"
+      }
+    }
+  }
+}

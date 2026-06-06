@@ -1,0 +1,8 @@
+# Local + CI test dependencies for the reference pipeline.
+# Glue scripts run on AWS Glue 4.0 (Python 3.10, Spark 3.3); local tests
+# use a lighter pyspark to keep CI fast.
+pytest>=8.0
+pyspark==3.5.0
+boto3>=1.34
+jsonschema>=4.21
+pyyaml>=6.0

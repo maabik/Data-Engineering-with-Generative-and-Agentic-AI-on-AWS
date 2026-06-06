@@ -1,0 +1,5 @@
+strands-agents
+boto3>=1.26.0
+mcp
+bedrock-agentcore
+PyJWT

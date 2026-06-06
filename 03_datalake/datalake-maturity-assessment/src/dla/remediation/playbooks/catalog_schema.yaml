@@ -1,0 +1,66 @@
+items:
+  - from_level: 1
+    title: "Run Glue Crawlers across lake buckets to bootstrap the Data Catalog"
+    impact: 5
+    effort: S
+    aws_services: [AWS Glue]
+    book_reference: "Chapter 4 — Data Mesh with Amazon DataZone"
+    why_it_matters: |
+      A lake without a catalog is unsearchable, ungovernable, and unusable to
+      agents. The crawler is the cheapest first step.
+    steps:
+      - "Create Glue databases per medallion layer (raw/silver/gold)."
+      - "Configure crawlers per S3 prefix; schedule daily."
+      - "Verify table count grows to cover ≥80% of lake data."
+    acceptance_criteria:
+      - "Glue Data Catalog has tables covering ≥80% of lake S3 data."
+
+  - from_level: 2
+    title: "Auto-generate column descriptions via Bedrock and write back to Glue"
+    impact: 4
+    effort: S
+    aws_services: [Amazon Bedrock, AWS Glue]
+    book_reference: "Chapter 4 — Data Mesh with Amazon DataZone"
+    why_it_matters: |
+      Tables without column descriptions can't be discovered, governed, or used
+      by RAG agents. Bedrock can do the bulk authoring in hours, not quarters.
+    steps:
+      - "Run auto-cataloger over your top-50 most-queried tables."
+      - "Review the LLM-suggested descriptions; bulk-approve safe ones."
+      - "Write back via UpdateTable API."
+    acceptance_criteria:
+      - "≥80% of columns on top-50 tables have non-empty Comment."
+    reference_code: "../../auto-cataloger/"
+
+  - from_level: 3
+    title: "Stand up an Amazon DataZone domain and publish curated assets"
+    impact: 5
+    effort: M
+    aws_services: [Amazon DataZone]
+    book_reference: "Chapter 4 — Data Mesh with Amazon DataZone"
+    why_it_matters: |
+      DataZone is where data products, business glossary, and lineage all
+      converge — the hub a data mesh assumes.
+    steps:
+      - "Use datazone-as-code to declare the domain, projects, glossary."
+      - "Publish your top-50 tables as data assets."
+      - "Onboard 2 producer teams and 2 consumer teams."
+    acceptance_criteria:
+      - "DataZone domain live with ≥50 published assets."
+    reference_code: "../../datazone-as-code/"
+
+  - from_level: 4
+    title: "Adopt versioned data contracts in source control with CI enforcement"
+    impact: 4
+    effort: M
+    aws_services: [AWS Glue, Amazon DataZone]
+    book_reference: "Chapter 4 — Data Mesh with Amazon DataZone"
+    why_it_matters: |
+      Data contracts make schema evolution explicit, testable, and reviewable —
+      the equivalent of API versioning for the data plane.
+    steps:
+      - "Define contract schema per published asset (yaml/json)."
+      - "Wire CI to validate Glue table schema against the contract on PR."
+      - "Block PRs on incompatible breaking changes."
+    acceptance_criteria:
+      - "Top-20 assets have contracts; CI gate is enabled."

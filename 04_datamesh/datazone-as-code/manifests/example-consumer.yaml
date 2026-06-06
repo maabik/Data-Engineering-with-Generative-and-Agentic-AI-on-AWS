@@ -1,0 +1,40 @@
+# datazone-as-code consumer-side manifest
+# Run against the default-consumer profile to provision the downstream domain
+# that subscribes to producer assets.
+#
+# Apply:    ./scripts/apply.sh default-consumer manifests/example-consumer.yaml
+# Destroy:  ./scripts/teardown.sh default-consumer manifests/example-consumer.yaml
+
+domain:
+  name: chocolate-mesh-consumer
+  description: Downstream consumer domain (separate AWS account)
+  version: V1
+  tags:
+    project: datazone-as-code
+    env: demo
+    side: consumer
+
+domain_units:
+  - key: analytics
+    name: analytics
+
+projects:
+  - key: marketing
+    name: marketing-analytics
+    description: Marketing analytics consumer project
+    domain_unit: analytics
+  - key: finance
+    name: finance-reporting
+    description: Finance reporting consumer project
+    domain_unit: analytics
+
+glossaries:
+  - key: consumer-terms
+    name: ConsumerTerms
+    description: Terms used by downstream analytics consumers
+    owning_project: marketing
+    terms:
+      - name: Cohort
+        short_description: A grouping of customers by acquisition month
+      - name: LTV
+        short_description: Lifetime value (12 month) for a customer cohort

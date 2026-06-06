@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "datalake-maturity-assessment"
+version = "0.1.0"
+description = "Programmatic scoring of an AWS data lake against eight maturity dimensions"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Justin Leto" }]
+dependencies = [
+    "boto3>=1.34",
+    "botocore>=1.34",
+    "click>=8.1",
+    "pyyaml>=6.0",
+    "rich>=13.7",
+]
+
+[project.scripts]
+dla = "dla.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"dla.remediation" = ["playbooks/*.yaml"]
+"dla" = ["../../config/*.yaml", "../../config/industry_presets/*.yaml"]

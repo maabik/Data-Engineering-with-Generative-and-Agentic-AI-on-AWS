@@ -1,0 +1,26 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "redshift:DescribeClusters",
+                "redshift:DescribeClusterSubnetGroups",
+                "redshift:DescribeClusterParameterGroups",
+                "redshift:DescribeClusterSecurityGroups"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "redshift:GetClusterCredentials"
+            ],
+            "Resource": [
+                "arn:aws:redshift:us-east-1:*:cluster:sales-demo-cluster",
+                "arn:aws:redshift:us-east-1:*:dbname:sales-demo-cluster/salesdb",
+                "arn:aws:redshift:us-east-1:*:dbuser:sales-demo-cluster/quicksight_user"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,51 @@
+# Drop at <repo>/.github/workflows/sandbox-teardown.yml
+#
+# Destroys the per-PR sandbox when the PR closes (merged or not).
+name: sandbox-teardown
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  id-token: write    # OIDC -> AWS (lab 7)
+  contents: read
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.SANDBOX_DEPLOY_ROLE }}
+          aws-region: us-east-1
+
+      - name: Empty sandbox buckets (Iceberg metadata blocks destroy)
+        env:
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          set -e
+          for suffix in raw curated glue-scripts; do
+            bucket="pr-${PR}-${suffix}-$(aws sts get-caller-identity --query Account --output text)"
+            if aws s3api head-bucket --bucket "$bucket" 2>/dev/null; then
+              aws s3 rm "s3://$bucket" --recursive
+            fi
+          done
+
+      - name: Destroy sandbox workspace
+        working-directory: reference-pipeline/terraform/envs/sandbox
+        env:
+          TF_WORKSPACE: pr-${{ github.event.pull_request.number }}
+          TF_VAR_owner: pr-${{ github.event.pull_request.number }}
+        run: |
+          terraform init
+          terraform workspace select $TF_WORKSPACE 2>/dev/null || exit 0
+          terraform destroy -auto-approve
+          terraform workspace select default
+          terraform workspace delete $TF_WORKSPACE

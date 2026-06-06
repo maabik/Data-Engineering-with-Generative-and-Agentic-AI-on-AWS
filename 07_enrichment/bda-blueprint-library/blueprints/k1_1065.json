@@ -1,0 +1,126 @@
+{
+  "class": "ScheduleK1Form1065",
+  "description": "IRS Schedule K-1 (Form 1065) Partner's Share of Income, Deductions, Credits, etc. Captures partnership and partner identity plus the partner's distributive share fields.",
+  "properties": {
+    "tax_year": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Calendar tax year shown on the K-1"
+    },
+    "partnership_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Part I A: name of the partnership"
+    },
+    "partnership_ein": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Part I A: partnership EIN"
+    },
+    "partnership_address": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Part I B: partnership mailing address"
+    },
+    "partner_ssn_or_ein": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Part II E: partner's identifying number"
+    },
+    "partner_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Part II F: partner's name"
+    },
+    "partner_address": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Part II F: partner's mailing address"
+    },
+    "partner_type": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Part II G: General/LP, Limited, or LLC member-manager"
+    },
+    "is_foreign_partner": {
+      "type": "boolean",
+      "inferenceType": "explicit",
+      "instruction": "Part II H1: whether the partner is a foreign partner"
+    },
+    "profit_share_begin": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Part II J: profit share percentage at beginning of year"
+    },
+    "profit_share_end": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Part II J: profit share percentage at end of year"
+    },
+    "loss_share_end": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Part II J: loss share percentage at end of year"
+    },
+    "capital_share_end": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Part II J: capital share percentage at end of year"
+    },
+    "capital_account_beginning": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Part II L: beginning capital account"
+    },
+    "capital_account_ending": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Part II L: ending capital account"
+    },
+    "ordinary_business_income": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Part III line 1: ordinary business income (loss)"
+    },
+    "net_rental_real_estate_income": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Part III line 2: net rental real estate income (loss)"
+    },
+    "interest_income": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Part III line 5: interest income"
+    },
+    "ordinary_dividends": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Part III line 6a: ordinary dividends"
+    },
+    "qualified_dividends": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Part III line 6b: qualified dividends"
+    },
+    "net_short_term_capital_gain": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Part III line 8: net short-term capital gain (loss)"
+    },
+    "net_long_term_capital_gain": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Part III line 9a: net long-term capital gain (loss)"
+    },
+    "self_employment_earnings": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Part III line 14: self-employment earnings (loss), code A"
+    },
+    "distributions": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Part III line 19: distributions, code A"
+    }
+  }
+}

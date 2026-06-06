@@ -1,0 +1,38 @@
+tables:
+  - s3://my-bucket/warehouse/db/events
+  - s3://my-bucket/warehouse/db/users
+  - s3://my-bucket/warehouse/db/transactions
+
+catalog:
+  type: glue
+  # properties:
+  #   warehouse: s3://my-bucket/warehouse
+
+thresholds:
+  compaction:
+    small_file_size_mb: 128
+    small_file_count_threshold: 100
+    small_file_ratio_threshold: 0.5
+  snapshots:
+    max_snapshots: 100
+    retention_hours: 168   # 7 days
+  orphans:
+    age_hours: 72          # 3 days
+  query_latency:
+    p95_warning_ms: 5000
+    p95_critical_ms: 15000
+    degradation_pct: 50
+
+monitoring:
+  mode: on-demand
+  interval_seconds: 3600
+
+aws:
+  region: us-east-1
+  # s3_endpoint: http://localhost:4566  # uncomment for LocalStack
+
+# Claude model to use for AI agent sub-command
+anthropic_model: us.anthropic.claude-sonnet-4-6
+
+# Set to true to simulate operations without making changes
+dry_run: false

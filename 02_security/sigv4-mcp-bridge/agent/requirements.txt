@@ -1,0 +1,1 @@
+-r ../sigv4_mcp_bridge/requirements.txt

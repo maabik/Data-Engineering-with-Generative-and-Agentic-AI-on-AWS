@@ -1,0 +1,26 @@
+# Great Expectations-style data contract for the curated region_revenue
+# table. The smoke runner reads this and translates each expectation into
+# an Athena query.
+#
+# Keep contracts in YAML so they review well in PRs and so non-engineers
+# can read them.
+
+table: region_revenue
+expectations:
+  - expect_column_values_to_not_be_null:
+      column: region
+      mostly: 0.999
+
+  - expect_column_values_to_be_between:
+      column: revenue
+      min_value: 0
+      strict_min: false
+
+  - expect_column_unique_value_count_to_be_between:
+      column: region
+      min_value: 5
+      max_value: 50
+
+  - expect_table_row_count_to_be_between:
+      min_value: 1
+      max_value: 1000000

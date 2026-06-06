@@ -1,0 +1,129 @@
+{
+  "class": "StandardPurchaseOrder",
+  "description": "Standard purchase order issued by a buyer to a vendor specifying goods or services to be procured, delivery requirements, pricing, and payment terms.",
+  "definitions": {
+    "LINE_ITEM": {
+      "properties": {
+        "sku": {
+          "type": "string",
+          "inferenceType": "explicit",
+          "instruction": "Stock keeping unit or part number identifying the product"
+        },
+        "description": {
+          "type": "string",
+          "inferenceType": "explicit",
+          "instruction": "Full description of the product or service for this line"
+        },
+        "quantity": {
+          "type": "number",
+          "inferenceType": "explicit",
+          "instruction": "Number of units ordered for this line item"
+        },
+        "unit_price": {
+          "type": "number",
+          "inferenceType": "explicit",
+          "instruction": "Price per single unit in the PO currency"
+        },
+        "line_total": {
+          "type": "number",
+          "inferenceType": "explicit",
+          "instruction": "Extended line total (quantity multiplied by unit price)"
+        }
+      }
+    }
+  },
+  "properties": {
+    "po_number": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Buyer-assigned purchase order number, typically labeled 'PO Number' or 'Purchase Order #' in the document header"
+    },
+    "issue_date": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Date the purchase order was issued, in ISO 8601 format if possible (e.g. 2024-05-15)"
+    },
+    "requested_delivery_date": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Date by which the buyer requires delivery of the ordered goods or services, in ISO 8601 format if possible"
+    },
+    "buyer_org_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Legal name of the buying organization, typically shown in the document header or 'Bill From' / 'Buyer' section"
+    },
+    "buyer_org_address": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Full mailing address of the buying organization including street, city, state, and ZIP/postal code"
+    },
+    "ship_to_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Name or department to which goods should be shipped, found in the 'Ship To' section"
+    },
+    "ship_to_address": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Full delivery address including street, city, state, and ZIP/postal code from the 'Ship To' section"
+    },
+    "vendor_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Legal name of the vendor or supplier receiving the purchase order"
+    },
+    "vendor_address": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Full mailing address of the vendor including street, city, state, and ZIP/postal code"
+    },
+    "vendor_contact": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Vendor contact person name, phone, or email if listed on the PO"
+    },
+    "payment_terms": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Payment terms as stated on the PO (e.g. Net 30, Net 60, 2/10 Net 30)"
+    },
+    "currency": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Three-letter ISO currency code (e.g. USD, EUR, GBP). Infer from currency symbols if not explicitly stated."
+    },
+    "subtotal": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Sum of all line item totals before tax, labeled 'Subtotal' near the bottom of the PO"
+    },
+    "tax_amount": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Total tax amount applied to the order, labeled 'Tax', 'Sales Tax', or 'VAT' near the order totals"
+    },
+    "order_total": {
+      "type": "number",
+      "inferenceType": "explicit",
+      "instruction": "Final total amount of the purchase order including subtotal and tax, typically labeled 'Total' or 'Order Total'"
+    },
+    "authorized_signer_name": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Printed name of the authorized buyer representative who signed or approved the PO, found near the signature block"
+    },
+    "authorized_signer_title": {
+      "type": "string",
+      "inferenceType": "explicit",
+      "instruction": "Job title of the authorized signer as printed near the signature block"
+    },
+    "line_items": {
+      "type": "array",
+      "instruction": "All product or service line items listed in the purchase order table",
+      "items": {
+        "$ref": "#/definitions/LINE_ITEM"
+      }
+    }
+  }
+}

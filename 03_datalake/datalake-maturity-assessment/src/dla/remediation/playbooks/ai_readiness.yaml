@@ -1,0 +1,49 @@
+items:
+  - from_level: 1
+    title: "Bring vector storage online: S3 Vectors or OpenSearch vector engine"
+    impact: 5
+    effort: M
+    aws_services: [Amazon S3 Vectors, Amazon OpenSearch Serverless]
+    book_reference: "Chapter 8 — RAG with S3 Vectors"
+    why_it_matters: |
+      Without a vector store, your lake is invisible to RAG. S3 Vectors is
+      the cheapest fast path; OpenSearch is the heavyweight option.
+    steps:
+      - "Pick top-3 tables/datasets to vectorize."
+      - "Embed via Bedrock Titan/Cohere; write to S3 Vectors."
+      - "Validate retrieval quality with a held-out eval set."
+    acceptance_criteria:
+      - "≥1 vector index populated with ≥10k embeddings from lake content."
+
+  - from_level: 3
+    title: "Connect Bedrock Knowledge Bases to lake content"
+    impact: 5
+    effort: M
+    aws_services: [Amazon Bedrock Knowledge Bases]
+    book_reference: "Chapter 8 — RAG with S3 Vectors"
+    why_it_matters: |
+      KBs handle ingestion, chunking, and retrieval. They turn the lake into
+      something Claude can reason over without you running infra.
+    steps:
+      - "Define a KB; point at S3 prefixes / Glue tables."
+      - "Run sync; verify retrieval quality."
+      - "Wire to a Strands agent or chat UI."
+    acceptance_criteria:
+      - "≥1 KB live; retrieval relevance >70% on eval set."
+
+  - from_level: 4
+    title: "Move agent access to Bedrock AgentCore Gateway with Identity Center"
+    impact: 5
+    effort: L
+    aws_services: [Bedrock AgentCore, AWS Identity Center]
+    book_reference: "Chapter 12 — Building AI Agents with Bedrock AgentCore"
+    why_it_matters: |
+      AgentCore Gateway is how agentic access scales: identity, audit, rate
+      limits, and catalog of tools — without rolling your own.
+    steps:
+      - "Stand up AgentCore Gateway."
+      - "Register MCP servers exposing lake tables and lineage."
+      - "Wire Identity Center for human-in-the-loop authorization."
+      - "Schedule embedding refresh on data changes via EventBridge."
+    acceptance_criteria:
+      - "Gateway live with ≥3 registered tools; embedding refresh on change."

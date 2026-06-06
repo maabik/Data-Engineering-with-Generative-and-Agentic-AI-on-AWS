@@ -1,0 +1,5 @@
+{"case_id": "qa-001", "messages": [{"role": "user", "content": [{"text": "What is the capital of France?"}]}], "expected_answer": "Paris", "task_label": "factual_qa"}
+{"case_id": "qa-002", "messages": [{"role": "user", "content": [{"text": "What is 12 multiplied by 8?"}]}], "expected_answer": "96", "task_label": "math"}
+{"case_id": "qa-003", "messages": [{"role": "user", "content": [{"text": "What does HTTP stand for?"}]}], "expected_answer": "HyperText Transfer Protocol", "task_label": "factual_qa"}
+{"case_id": "qa-004", "messages": [{"role": "user", "content": [{"text": "Name the planet closest to the Sun."}]}], "expected_answer": "Mercury", "task_label": "factual_qa"}
+{"case_id": "qa-005", "messages": [{"role": "user", "content": [{"text": "What programming language is known for frontend web development?"}]}], "expected_answer": "JavaScript", "task_label": "factual_qa"}

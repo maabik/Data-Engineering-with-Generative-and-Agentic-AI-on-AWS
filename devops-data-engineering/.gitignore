@@ -1,0 +1,39 @@
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+
+# Node / CDK
+node_modules/
+cdk.out/
+dist/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Local secrets / scratch
+.env
+.env.local
+*.local.tfvars
+plan.json
+plan.txt
+plan.tfplan
+drift.tfplan
+eval-report.json
+report.json
+.secrets.baseline

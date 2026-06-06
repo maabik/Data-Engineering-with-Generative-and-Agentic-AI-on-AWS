@@ -1,0 +1,4 @@
+boto3>=1.34
+fastapi>=0.111
+pydantic>=2.6
+uvicorn[standard]>=0.30

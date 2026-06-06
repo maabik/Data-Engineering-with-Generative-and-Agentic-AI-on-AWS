@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+agentcore_env/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Bedrock AgentCore generated state (account-specific)
+.bedrock_agentcore.yaml
+
+# Local secrets / generated configs
+redshift-mcp-config.json
+DEPLOYMENT_SUMMARY.md
+*.local.json
+.env
+.env.*
+
+# Editor
+.idea/
+.vscode/

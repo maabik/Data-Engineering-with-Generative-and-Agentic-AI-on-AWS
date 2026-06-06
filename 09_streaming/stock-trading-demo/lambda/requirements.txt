@@ -1,0 +1,2 @@
+# boto3 is provided by the Lambda runtime; pin nothing here.
+# This file exists so deploy-complete-solution.sh's `pip install -r requirements.txt -t .` is a no-op.

@@ -1,0 +1,20 @@
+# Data contract for the cocoa_shipments asset published by chocolate-producer.
+# Matches the seeded Glue table; running `dpv validate` against a freshly
+# seeded chocolate-mesh should produce zero breaking findings.
+asset: cocoa_shipments
+project: chocolate-producer
+description: Demo asset for cocoa_shipments (cross-domain-lineage seed)
+
+columns:
+  - name: id
+    type: string
+    required: true
+  - name: amount
+    type: double
+    required: true
+  - name: ts
+    type: timestamp
+    required: true
+
+glossary_terms:
+  - Cocoa

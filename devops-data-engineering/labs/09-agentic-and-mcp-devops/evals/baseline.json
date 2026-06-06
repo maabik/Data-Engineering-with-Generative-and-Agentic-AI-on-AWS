@@ -1,0 +1,6 @@
+{
+  "_comment": "Update with actual measured values once the agent is deployed once. CI gates regressions against these.",
+  "latency_p95": 6.5,
+  "cost_avg": 0.012,
+  "pass_rate": 1.0
+}

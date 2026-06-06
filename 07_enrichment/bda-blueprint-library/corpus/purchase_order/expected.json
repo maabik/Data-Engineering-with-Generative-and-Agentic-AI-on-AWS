@@ -1,0 +1,49 @@
+{
+  "po_number": "PO-2025-44217",
+  "issue_date": "2025-02-04",
+  "requested_delivery_date": "2025-03-15",
+  "buyer_org_name": "Helix Diagnostics Inc.",
+  "buyer_org_address": "1880 Pacific Avenue, Suite 400, San Diego, CA 92101",
+  "ship_to_name": "Helix Diagnostics Lab Receiving",
+  "ship_to_address": "2600 Innovation Drive, Dock 7, San Diego, CA 92121",
+  "vendor_name": "Aurora Cloud Solutions, LLC",
+  "vendor_address": "120 Market Street, Suite 800, San Francisco, CA 94105",
+  "vendor_contact": "Marcus Yi  |  marcus.yi@auroracloud.example  |  (415) 555-0142",
+  "payment_terms": "Net 30",
+  "currency": "USD",
+  "subtotal": 28450.0,
+  "tax_amount": 2489.38,
+  "order_total": 30939.38,
+  "line_items": [
+    {
+      "sku": "AC-CLD-PROF-40",
+      "description": "Cloud architecture professional services - 40 hour block",
+      "quantity": 1,
+      "unit_price": 12000.0,
+      "line_total": 12000.0
+    },
+    {
+      "sku": "AC-DPI-IMPL-25",
+      "description": "Data pipeline implementation - 25 hour engagement",
+      "quantity": 1,
+      "unit_price": 9500.0,
+      "line_total": 9500.0
+    },
+    {
+      "sku": "AC-KT-WS-1",
+      "description": "Knowledge transfer workshop - one-day onsite",
+      "quantity": 1,
+      "unit_price": 4500.0,
+      "line_total": 4500.0
+    },
+    {
+      "sku": "AC-DOC-RPT",
+      "description": "Architecture deliverable / runbook documentation",
+      "quantity": 1,
+      "unit_price": 2450.0,
+      "line_total": 2450.0
+    }
+  ],
+  "authorized_signer_name": "Priya Ramanathan",
+  "authorized_signer_title": "VP Procurement"
+}
