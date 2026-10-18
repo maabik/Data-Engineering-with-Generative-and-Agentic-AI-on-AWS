@@ -1,0 +1,312 @@
+{
+  "companyAnnouncements": [
+    "# AI-DLC — AI-Driven Development Life Cycle\n\nRun `/aidlc` to start or resume a workflow. Describe what to build and scope is auto-detected.\n\n**Phases** (33 stages across 5 phases):\n\n| Phase          | Stages       | Focus                                            |\n|----------------|--------------|--------------------------------------------------|\n| INITIALIZATION | 0.1–0.3 (3)  | Bootstrap state, scaffold dirs, detect workspace |\n| IDEATION       | 1.1–1.7 (7)  | Validate intent, scope, feasibility              |\n| INCEPTION      | 2.1–2.9 (9)  | Practices, requirements, design, planning        |\n| CONSTRUCTION   | 3.1–3.7 (7)  | Build, test, CI — per unit                       |\n| OPERATION      | 4.1–4.7 (7)  | Deploy, observe, optimise                        |\n\n**Stages:**\n\n| Phase        | Stages                                                                                              |\n|--------------|-----------------------------------------------------------------------------------------------------|\n| IDEATION     | IC=Intent Capture · MR=Market Research · FS=Feasibility · SD=Scope Definition                       |\n|              | TF=Team Formation · RM=Rough Mockups · AH=Approval Handoff                                          |\n| INCEPTION    | RE=Reverse Engineering · PD=Practices Discovery · RA=Requirements Analysis · US=User Stories        |\n|              | RF=Refined Mockups · DD=Domain Design · UG=Units Generation · CD=Contract Design · DL=Delivery Planning |\n| CONSTRUCTION | FD=Functional Design · NR=NFR Requirements · ND=NFR Design · ID=Infrastructure Design               |\n|              | CG=Code Generation · BT=Build & Test · CI=CI Pipeline                                               |\n| OPERATION    | DP=Deployment Pipeline · EP=Env Provisioning · DE=Deployment Execution · OS=Observability Setup     |\n|              | IR=Incident Response · PV=Performance Validation · FO=Feedback & Optimization                       |\n\n**Scopes** (INIT 0.1–0.3 always runs):\n\n| Scope          | Depth         | IDEATION       | INCEPTION       | CONSTRUCTION   | OPERATION      |\n|----------------|---------------|----------------|-----------------|----------------|----------------|\n| enterprise     | Comprehensive | all            | all             | all            | all            |\n| feature        | Standard      | all            | all             | all            | all            |\n| mvp            | Standard      | IC, FS, SD, RM | all             | all            | —              |\n| poc            | Minimal       | IC             | RE, RA          | CG, BT         | —              |\n| bugfix         | Minimal       | —              | RE, RA          | CG, BT         | DP, DE         |\n| refactor       | Minimal       | —              | RE, RA          | FD, CG, BT     | DP, DE         |\n| infra          | Standard      | —              | RA              | NR, ND, ID, CI | DP, EP, DE, OS |\n| security-patch | Minimal       | —              | RE              | NR, CG, BT     | DP, DE         |\n| classic        | Standard      | —              | all             | FD, NR, ND, ID, CG, BT            | —            |\n| workshop       | Standard      | —              | all             | all            | all            |\n| express        | Minimal       | —              | RE, RA          | CG, BT         | DP, DE, OS     |\n\n**Workflow**\n\n1. Scope is set from your command, or auto-detected from what you describe.\n2. Stages execute in order, with appropriate agents leading each one.\n3. At every approval gate, you review output and decide whether to approve, revise, or skip.\n4. Artifacts are saved under the active intent record in `aidlc/spaces/<space>/intents/<record>/` for review at any time.\n\n**Tips**\n- Describe your task in plain English — scope is auto-detected\n- Run `/aidlc --status` to check progress at any time\n- Run `/aidlc --stage <id>` or `/aidlc --phase <name>` to jump ahead\n- Run `/aidlc --help` for full usage and examples"
+  ],
+  "permissions": {
+    "allow": [
+      "Edit(/**)",
+      "Bash(bun .claude/tools/aidlc.ts engine *)",
+      "Bash(bun .claude/tools/aidlc.ts doctor)",
+      "Bash(bun .claude/tools/aidlc.ts doctor --verbose)",
+      "Bash(bun .claude/tools/aidlc.ts version)",
+      "Bash(bun .claude/tools/aidlc.ts --doctor)",
+      "Bash(bun .claude/tools/aidlc.ts --doctor --verbose)",
+      "Bash(bun .claude/tools/aidlc.ts --version)",
+      "Bash(bun .claude/tools/aidlc.ts status)",
+      "Bash(bun .claude/tools/aidlc.ts --status)",
+      "Bash(bun .claude/tools/aidlc.ts config --help)",
+      "Bash(bun .claude/tools/aidlc.ts config --show)",
+      "Bash(bun .claude/tools/aidlc.ts config --show --json)",
+      "Bash(bun .claude/tools/aidlc.ts config models --show)",
+      "Bash(bun .claude/tools/aidlc.ts config models --show --json)",
+      "Bash(bun .claude/tools/aidlc.ts config models --help)",
+      "Bash(bun .claude/tools/aidlc.ts config runtime --show)",
+      "Bash(bun .claude/tools/aidlc.ts config runtime --show --json)",
+      "Bash(bun .claude/tools/aidlc.ts config runtime --help)",
+      "Bash(bun .claude/tools/aidlc.ts config providers --show)",
+      "Bash(bun .claude/tools/aidlc.ts config providers --show --json)",
+      "Bash(bun .claude/tools/aidlc.ts config providers --help)",
+      "Bash(bun .claude/tools/aidlc.ts config trust --show)",
+      "Bash(bun .claude/tools/aidlc.ts config trust --show --json)",
+      "Bash(bun .claude/tools/aidlc.ts config trust --help)",
+      "Bash(bun .claude/tools/aidlc.ts config flags --show)",
+      "Bash(bun .claude/tools/aidlc.ts config flags --show --json)",
+      "Bash(bun .claude/tools/aidlc.ts config flags --help)",
+      "Bash(bun .claude/tools/aidlc.ts config project --show)",
+      "Bash(bun .claude/tools/aidlc.ts config project --show --json)",
+      "Bash(bun .claude/tools/aidlc.ts config project --help)",
+      "Bash(bun .claude/tools/aidlc.ts config flags --clear-bypass AIDLC_SKIP_ARTIFACT_GUARD --yes)",
+      "Bash(bun .claude/tools/aidlc.ts config flags --clear-bypass AIDLC_SKIP_REVISION_BACKSTOP --yes)",
+      "Bash(bun .claude/tools/aidlc.ts config flags --clear-bypass AIDLC_SKIP_SUMMARY_CONFIRMATION_GUARD --yes)",
+      "Bash(bun .claude/tools/aidlc.ts config flags --clear-bypass AIDLC_SKIP_HUMAN_PRESENCE_GUARD --yes)",
+      "Bash(bun .claude/tools/aidlc.ts config flags --clear-bypass AIDLC_DISABLE_ENSEMBLE_EVIDENCE --yes)",
+      "Bash(bun .claude/tools/aidlc.ts config flags --clear-bypass AIDLC_DISABLE_PLAN_APPROVAL_GUARD --yes)",
+      "Bash(bun .claude/tools/aidlc.ts config flags --clear-bypass AIDLC_DISABLE_REVIEWER_SCOPE_HOOK --yes)",
+      "Bash(bun .claude/tools/aidlc.ts config flags --clear-bypass AIDLC_DISABLE_REVIEW_FREEZE_HOOK --yes)",
+      "Bash(bun .claude/tools/aidlc.ts config flags --clear-bypass AIDLC_DISABLE_USAGE_TRACKING --yes)",
+      "Bash(bun .claude/tools/aidlc.ts config flags --clear-bypass AIDLC_DISABLE_SENSORS --yes)",
+      "Bash(bun .claude/tools/aidlc.ts config flags --clear-bypass AIDLC_DISABLE_LEARNINGS --yes)",
+      "Bash(bun .claude/tools/aidlc.ts config flags --clear-bypass AIDLC_DISABLE_SUMMARY_CONFIRMATION --yes)",
+      "Bash(bun .claude/tools/aidlc-attest.ts)",
+      "Bash(bun .claude/tools/aidlc-attest.ts *)",
+      "Bash(bun .claude/tools/aidlc-audit.ts)",
+      "Bash(bun .claude/tools/aidlc-audit.ts *)",
+      "Bash(bun .claude/tools/aidlc-bolt.ts)",
+      "Bash(bun .claude/tools/aidlc-bolt.ts *)",
+      "Bash(bun .claude/tools/aidlc-completions.ts)",
+      "Bash(bun .claude/tools/aidlc-completions.ts *)",
+      "Bash(bun .claude/tools/aidlc-graph.ts)",
+      "Bash(bun .claude/tools/aidlc-graph.ts *)",
+      "Bash(bun .claude/tools/aidlc-jump.ts)",
+      "Bash(bun .claude/tools/aidlc-jump.ts *)",
+      "Bash(bun .claude/tools/aidlc-knowledge.ts)",
+      "Bash(bun .claude/tools/aidlc-knowledge.ts *)",
+      "Bash(bun .claude/tools/aidlc-learnings.ts)",
+      "Bash(bun .claude/tools/aidlc-learnings.ts *)",
+      "Bash(bun .claude/tools/aidlc-log.ts)",
+      "Bash(bun .claude/tools/aidlc-log.ts *)",
+      "Bash(bun .claude/tools/aidlc-orchestrate.ts)",
+      "Bash(bun .claude/tools/aidlc-orchestrate.ts *)",
+      "Bash(bun .claude/tools/aidlc-plugin.ts)",
+      "Bash(bun .claude/tools/aidlc-plugin.ts *)",
+      "Bash(bun .claude/tools/aidlc-review-brief.ts)",
+      "Bash(bun .claude/tools/aidlc-review-brief.ts *)",
+      "Bash(bun .claude/tools/aidlc-runner-gen.ts)",
+      "Bash(bun .claude/tools/aidlc-runner-gen.ts *)",
+      "Bash(bun .claude/tools/aidlc-runtime.ts)",
+      "Bash(bun .claude/tools/aidlc-runtime.ts *)",
+      "Bash(bun .claude/tools/aidlc-sensor-claim-sources.ts)",
+      "Bash(bun .claude/tools/aidlc-sensor-claim-sources.ts *)",
+      "Bash(bun .claude/tools/aidlc-sensor-linter.ts)",
+      "Bash(bun .claude/tools/aidlc-sensor-linter.ts *)",
+      "Bash(bun .claude/tools/aidlc-sensor-required-sections.ts)",
+      "Bash(bun .claude/tools/aidlc-sensor-required-sections.ts *)",
+      "Bash(bun .claude/tools/aidlc-sensor-traceability.ts)",
+      "Bash(bun .claude/tools/aidlc-sensor-traceability.ts *)",
+      "Bash(bun .claude/tools/aidlc-sensor-type-check.ts)",
+      "Bash(bun .claude/tools/aidlc-sensor-type-check.ts *)",
+      "Bash(bun .claude/tools/aidlc-sensor-upstream-coverage.ts)",
+      "Bash(bun .claude/tools/aidlc-sensor-upstream-coverage.ts *)",
+      "Bash(bun .claude/tools/aidlc-sensor.ts)",
+      "Bash(bun .claude/tools/aidlc-sensor.ts *)",
+      "Bash(bun .claude/tools/aidlc-state.ts)",
+      "Bash(bun .claude/tools/aidlc-state.ts *)",
+      "Bash(bun .claude/tools/aidlc-swarm.ts)",
+      "Bash(bun .claude/tools/aidlc-swarm.ts *)",
+      "Bash(bun .claude/tools/aidlc-testing-posture.ts)",
+      "Bash(bun .claude/tools/aidlc-testing-posture.ts *)",
+      "Bash(bun .claude/tools/aidlc-unit.ts)",
+      "Bash(bun .claude/tools/aidlc-unit.ts *)",
+      "Bash(bun .claude/tools/aidlc-utility.ts)",
+      "Bash(bun .claude/tools/aidlc-utility.ts *)",
+      "Bash(bun .claude/tools/aidlc-validate.ts)",
+      "Bash(bun .claude/tools/aidlc-validate.ts *)",
+      "Bash(bun .claude/tools/aidlc-workspace-sync.ts)",
+      "Bash(bun .claude/tools/aidlc-workspace-sync.ts *)",
+      "Bash(bun .claude/tools/aidlc-worktree.ts)",
+      "Bash(bun .claude/tools/aidlc-worktree.ts *)",
+      "Task",
+      "WebSearch"
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine statusline"
+  },
+  "env": {
+    "AWS_AIDLC_DEFAULT_SCOPE": "classic"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook fold-usage",
+            "timeout": 1800
+          }
+        ]
+      },
+      {
+        "matcher": "Task|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook deliver-stage-rules",
+            "timeout": 1800
+          }
+        ]
+      },
+      {
+        "matcher": "Read|NotebookRead|Edit|MultiEdit|Write|NotebookEdit|LS|Glob|Grep|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook state-transition-guard",
+            "timeout": 1800
+          },
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook reviewer-scope",
+            "timeout": 1800
+          },
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook review-freeze",
+            "timeout": 1800
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|MultiEdit|Write|NotebookEdit|Bash|Task|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook plan-approval-guard",
+            "timeout": 1800
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook record-human-turn",
+            "timeout": 1800
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook session-start",
+            "timeout": 1800
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook session-end",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook write-audit-log",
+            "timeout": 1800
+          },
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook run-sensors",
+            "timeout": 3600
+          }
+        ]
+      },
+      {
+        "matcher": "TaskUpdate",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook sync-workflow-state",
+            "timeout": 1800
+          }
+        ]
+      },
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook record-human-turn",
+            "timeout": 1800
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook rebuild-stage-graph",
+            "timeout": 1800
+          }
+        ]
+      },
+      {
+        "matcher": "Task|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook deliver-stage-rules",
+            "timeout": 1800
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook fold-usage",
+            "timeout": 1800
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook validate-state",
+            "timeout": 1800
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook log-subagent",
+            "timeout": 1800
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/tools/aidlc.ts\" engine hook continue-workflow",
+            "timeout": 3600
+          }
+        ]
+      }
+    ]
+  }
+}

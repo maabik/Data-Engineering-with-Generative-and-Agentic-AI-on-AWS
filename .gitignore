@@ -48,3 +48,6 @@ node_modules/
 12_agentic/mcp/redshift-mcp-server/
 12_agentic/mcp/agentcore mcp server/redshift-mcp-server/
 12_agentic/mcp/02-hosting-MCP-server/awslabs/
+
+# AI-DLC personal overrides
+.claude/settings.local.json
