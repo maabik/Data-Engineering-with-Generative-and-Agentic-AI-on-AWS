@@ -245,6 +245,11 @@ if ! aws ecr describe-repositories --repository-names "$ECR_REPO" --region "$REG
 fi
 ECR_URI="${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
 ECR_HOST="${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com"
+# Use the repository URI the ECR API reports (floci returns <acct>.dkr.ecr.<region>.localhost:4566/<repo>)
+REPO_URI="$(aws ecr describe-repositories --repository-names "$ECR_REPO" --region "$REGION" --query 'repositories[0].repositoryUri' --output text 2>/dev/null || true)"
+if [ -n "$REPO_URI" ] && [ "$REPO_URI" != "None" ]; then ECR_URI="$REPO_URI"; ECR_HOST="${REPO_URI%%/*}"; fi
+# Local dev (e.g. floci): set LOCAL_REGISTRY=localhost:5000 to push to a plain local registry instead of ECR
+if [ -n "${LOCAL_REGISTRY:-}" ]; then ECR_HOST="$LOCAL_REGISTRY"; ECR_URI="$LOCAL_REGISTRY/$ECR_REPO"; fi
 
 if command -v docker >/dev/null 2>&1; then
   RUNTIME=docker
@@ -254,14 +259,18 @@ else
   echo "ERROR: need docker or finch installed" >&2; exit 1
 fi
 echo "  container runtime: $RUNTIME, push -> $ECR_URI"
-aws ecr get-login-password --region "$REGION" | "$RUNTIME" login --username AWS --password-stdin "$ECR_HOST" >/dev/null
+[ -n "${LOCAL_REGISTRY:-}" ] || aws ecr get-login-password --region "$REGION" | "$RUNTIME" login --username AWS --password-stdin "$ECR_HOST" >/dev/null
 
-if [ "$RUNTIME" = "docker" ]; then
+if [ "$RUNTIME" = "docker" ] && docker --version 2>&1 | grep -qi podman; then
+  # docker is an alias for podman, which has no `buildx use`
+  docker build --platform "${CONTAINER_PLATFORM:-linux/$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')}" -t "${ECR_URI}:latest" "$HERE/agent" >&2
+  docker push "${ECR_URI}:latest" >&2
+elif [ "$RUNTIME" = "docker" ]; then
   docker buildx inspect sql-evaluations-agent-builder >/dev/null 2>&1 || docker buildx create --name sql-evaluations-agent-builder --use >/dev/null
   docker buildx use sql-evaluations-agent-builder >/dev/null
-  docker buildx build --platform linux/arm64 -t "${ECR_URI}:latest" --push "$HERE/agent" >&2
+  docker buildx build --platform "${CONTAINER_PLATFORM:-linux/arm64}" -t "${ECR_URI}:latest" --push "$HERE/agent" >&2
 else
-  finch build --platform linux/arm64 -t "${ECR_URI}:latest" "$HERE/agent" >&2
+  finch build --platform "${CONTAINER_PLATFORM:-linux/arm64}" -t "${ECR_URI}:latest" "$HERE/agent" >&2
   finch push "${ECR_URI}:latest" >&2
 fi
 
