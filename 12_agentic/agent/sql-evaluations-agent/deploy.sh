@@ -323,7 +323,8 @@ aws lambda wait function-updated --function-name "$LAMBDA_NAME" --region "$REGIO
 
 # ─── 9. Seed steering doc ───────────────────────────────────────────────────
 STEERING_BUCKET="$STEERING_BUCKET" STEERING_KEY="$STEERING_KEY" AWS_REGION="$REGION" \
-  python3 "$HERE/scripts/seed_steering_doc.py" || true
+  "${PYTHON:-python3}" "$HERE/scripts/seed_steering_doc.py" \
+  || echo "  warn: steering doc not seeded (needs boto3; set PYTHON=/path/to/python with boto3)" >&2
 
 # ─── 10. SSM Parameter for downstream callers ───────────────────────────────
 aws ssm put-parameter --name "/sql-evaluations-agent/agent_runtime_arn" --value "$RUNTIME_ARN" --type String --overwrite --region "$REGION" >/dev/null
