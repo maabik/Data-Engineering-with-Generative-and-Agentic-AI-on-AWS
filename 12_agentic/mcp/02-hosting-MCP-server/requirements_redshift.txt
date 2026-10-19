@@ -7,3 +7,4 @@ regex>=2024.11.6
 fastmcp>=2.12.3
 bedrock-agentcore
 bedrock-agentcore-starter-toolkit
+awslabs.redshift-mcp-server>=0.0.34,<0.1
