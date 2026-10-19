@@ -274,7 +274,7 @@ echo "  container runtime: $RUNTIME, push -> $ECR_URI"
 
 if [ "$RUNTIME" = "docker" ] && docker --version 2>&1 | grep -qi podman; then
   # docker is an alias for podman, which has no `buildx use`
-  docker build --platform "${CONTAINER_PLATFORM:-linux/arm64}" -t "${ECR_URI}:latest" "$HERE/agent" >&2
+  docker build --platform "${CONTAINER_PLATFORM:-linux/$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')}" -t "${ECR_URI}:latest" "$HERE/agent" >&2
   docker push "${ECR_URI}:latest" >&2
 elif [ "$RUNTIME" = "docker" ]; then
   docker buildx inspect text-to-dag-agent-builder >/dev/null 2>&1 || docker buildx create --name text-to-dag-agent-builder --use >/dev/null
