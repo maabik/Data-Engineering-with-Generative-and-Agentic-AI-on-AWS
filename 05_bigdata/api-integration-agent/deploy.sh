@@ -307,6 +307,9 @@ if ! aws ecr describe-repositories --repository-names "$ECR_REPO" --region "$REG
 fi
 ECR_URI="${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
 ECR_HOST="${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com"
+# Use the repository URI the ECR API reports (floci returns <acct>.dkr.ecr.<region>.localhost:4566/<repo>)
+REPO_URI="$(aws ecr describe-repositories --repository-names "$ECR_REPO" --region "$REGION" --query 'repositories[0].repositoryUri' --output text 2>/dev/null || true)"
+if [ -n "$REPO_URI" ] && [ "$REPO_URI" != "None" ]; then ECR_URI="$REPO_URI"; ECR_HOST="${REPO_URI%%/*}"; fi
 # Local dev (e.g. floci): set LOCAL_REGISTRY=localhost:5000 to push to a plain local registry instead of ECR
 if [ -n "${LOCAL_REGISTRY:-}" ]; then ECR_HOST="$LOCAL_REGISTRY"; ECR_URI="$LOCAL_REGISTRY/$ECR_REPO"; fi
 
