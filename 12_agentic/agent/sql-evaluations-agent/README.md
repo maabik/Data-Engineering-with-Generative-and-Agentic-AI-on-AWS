@@ -79,6 +79,10 @@ Path: `s3://${PREFIX}-${ACCOUNT}-${REGION}/steering-doc.md` (versioned).
 Prerequisites: AWS credentials (default profile), region `us-east-1`, and
 either `docker buildx` or `finch` for the ARM64 image build.
 
+> **Local emulator (floci) + podman:** with `AWS_ENDPOINT_URL` pointing at floci, `deploy.sh` pushes to
+> the ECR URI reported by the ECR API. Under podman it builds for the host architecture (no qemu needed);
+> set `CONTAINER_PLATFORM=linux/arm64` to force ARM64. Real AgentCore Runtime still requires ARM64.
+
 ```bash
 bash deploy.sh
 ```

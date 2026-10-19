@@ -225,6 +225,10 @@ has something to listen to. The architect agent does not need to be
 deployed for AUTHOR mode; ENFORCE mode reads from
 `data_architect_agent_curated.<table>` (override via `GLUE_DATABASE=...`) once it's there.
 
+> **Local emulator (floci) + podman:** with `AWS_ENDPOINT_URL` pointing at floci, `deploy.sh` pushes to
+> the ECR URI reported by the ECR API. Under podman it builds for the host architecture (no qemu needed);
+> set `CONTAINER_PLATFORM=linux/arm64` to force ARM64. Real AgentCore Runtime still requires ARM64.
+
 ```
 ./deploy.sh
 ```

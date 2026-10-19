@@ -136,6 +136,10 @@ shared S3 bucket (default `data-profiling-agent-${ACCOUNT}-${REGION}`), reuses t
 `data-quality-deequ-agent-wg` Athena workgroup, reads `data_quality_deequ_agent_dq.dq_results`, and reads
 `data_architect_agent_curated.<curated_table>` for `peek_failing_rows`.
 
+> **Local emulator (floci) + podman:** with `AWS_ENDPOINT_URL` pointing at floci, `deploy.sh` pushes to
+> the ECR URI reported by the ECR API. Under podman it builds for the host architecture (no qemu needed);
+> set `CONTAINER_PLATFORM=linux/arm64` to force ARM64. Real AgentCore Runtime still requires ARM64.
+
 ```
 ./deploy.sh
 ```

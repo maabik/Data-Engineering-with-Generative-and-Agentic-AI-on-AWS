@@ -138,6 +138,10 @@ arm64). The shared data lake bucket
 uses it for `landing/`, `api-integrations/code/`,
 `api-integrations/reports/`, and `api-requests/`.
 
+> **Local emulator (floci) + podman:** with `AWS_ENDPOINT_URL` pointing at floci, `deploy.sh` pushes to
+> the ECR URI reported by the ECR API. Under podman it builds for the host architecture (no qemu needed);
+> set `CONTAINER_PLATFORM=linux/arm64` to force ARM64. Real AgentCore Runtime still requires ARM64.
+
 ```
 ./deploy.sh
 ```

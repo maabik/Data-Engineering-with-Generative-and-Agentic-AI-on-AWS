@@ -56,7 +56,7 @@ Beyond the AWS account / CLI setup in the next section, you need:
   needs to be new enough to run the deploy scripts.
 - **Docker** or **[Finch](https://runfinch.com/)** — required for every
   AgentCore agent (chapters 05, 06, 12). Each `deploy.sh` builds an
-  ARM64 container image and pushes it to ECR; `docker buildx` (or
+  ARM64 container image (the host architecture under podman) and pushes it to ECR; `docker buildx` (or
   `finch build --platform linux/arm64`) is what does the build. CDK
   projects (chapter 02 audit-trail, chapter 03 medallion starter, the
   finops stack) also use Docker for asset bundling.
@@ -191,6 +191,35 @@ tools, IAM scoping, and the latest 10/10 routing test results, see
 [`12_agentic/agent/data-engineering-orchestrator-agent/README.md`](12_agentic/agent/data-engineering-orchestrator-agent/README.md)
 and the supporting chapter-12 README at
 [`12_agentic/README.md`](12_agentic/README.md).
+
+---
+
+## Running locally on floci (podman / WSL)
+
+The AgentCore deploy scripts can target a local AWS emulator (floci) instead of a real account. With
+`AWS_ENDPOINT_URL=http://localhost:4566` set in your shell:
+
+- `deploy.sh` reads the ECR repository URI from the ECR API (floci returns
+  `<account>.dkr.ecr.<region>.localhost:4566/<repo>`), so the image is pushed to
+  floci's ECR. Set `LOCAL_REGISTRY=host:port` to push to a plain registry instead.
+- With podman as `docker`, the scripts use `docker build` + `docker push`
+  (podman has no `buildx use`). The image platform defaults to the host
+  architecture; set `CONTAINER_PLATFORM=linux/arm64` to force ARM64 (needs qemu
+  on an x86 host).
+- The bridge Lambdas and the `invoke_agent.py` helpers honor `AWS_ENDPOINT_URL`
+  (or `AWS_ENDPOINT_URL_BEDROCK_AGENTCORE`) for the AgentCore data plane instead
+  of the hard-coded `bedrock-agentcore.<region>.amazonaws.com` URL.
+- `mcp` is pinned to `<2` in the agent requirements (mcp 2.x renamed
+  `streamablehttp_client`).
+- floci registers AgentCore runtimes but does not run them (invocations return a
+  canned reply) and stubs Bedrock model calls. Use it to validate deployments,
+  not agent behavior.
+
+Deployed this way: the six chapter-05 agents, the two chapter-06 agents, and in
+chapter 12 the Redshift MCP server (`deploy.sh`), `sql-evaluations-agent` and
+`sales-reporting-agent` (`deploy.sh`, new). Not deployed: `knowledge-graph-agent`
+(chapter 08, needs Neptune Analytics, which floci does not emulate) and the
+chapter-12 orchestrator and online-evaluation agents.
 
 ---
 

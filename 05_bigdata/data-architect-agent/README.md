@@ -110,6 +110,10 @@ or `finch` for `linux/arm64` builds (AgentCore Runtime requires arm64).
 S3 bucket (default `data-profiling-agent-${ACCOUNT}-${REGION}`) so the EventBridge rule has
 something to listen to.
 
+> **Local emulator (floci) + podman:** with `AWS_ENDPOINT_URL` pointing at floci, `deploy.sh` pushes to
+> the ECR URI reported by the ECR API. Under podman it builds for the host architecture (no qemu needed);
+> set `CONTAINER_PLATFORM=linux/arm64` to force ARM64. Real AgentCore Runtime still requires ARM64.
+
 ```
 ./deploy.sh
 ```

@@ -134,6 +134,23 @@ The launch step writes `.bedrock_agentcore.yaml` (gitignored) with the
 runtime ARN. Note it down — `quick_test.py` reads it from the local
 config; `invoke_agent_multiple.py` accepts it as `AGENT_RUNTIME_ARN`.
 
+### One-shot alternative: `deploy.sh`
+
+`deploy.sh` does the same three steps through the AWS CLI instead of
+`agentcore configure/launch` (which does not honor `AWS_ENDPOINT_URL`, so it
+cannot target a local emulator such as floci). It checks the prerequisites
+(Redshift MCP server, SQL Evaluations Agent), then creates
+`SalesAgentExecutionRole`, the Cognito pool/client/user, the
+`sales-agent-credentials` secret, builds and pushes the image, and creates the
+runtime with the `Authorization` header passed through.
+
+```bash
+COGNITO_PASSWORD='<a strong password>' REDSHIFT_PASSWORD='<sales_reader password>' ./deploy.sh
+```
+
+On a podman host the image is built for the host architecture; set
+`CONTAINER_PLATFORM=linux/arm64` to force ARM64.
+
 ## Invoke
 
 Get a Cognito access token, then call the runtime:
@@ -154,8 +171,10 @@ TOKEN=$(aws cognito-idp initiate-auth --auth-flow USER_PASSWORD_AUTH \
 python3 quick_test.py "What were the top five products by revenue last quarter?"
 ```
 
-`quick_test.py` and friends read `.bedrock_agentcore.yaml` to find the
-runtime ARN and use the token from the helper above.
+`quick_test.py`, `test_invoke.py` and `invoke_agent_multiple.py` build the agent
+in-process with `create_sales_agent()` (they do not call the deployed runtime);
+they need the secrets and SSM parameters from the prerequisites, plus Bedrock
+access, in your current AWS environment.
 
 ## Teardown
 

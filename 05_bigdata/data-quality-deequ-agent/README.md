@@ -148,6 +148,10 @@ project piggybacks on the shared S3 bucket (default
 `data-profiling-agent-${ACCOUNT}-${REGION}`) and reads from the `data_architect_agent_curated` Glue
 database.
 
+> **Local emulator (floci) + podman:** with `AWS_ENDPOINT_URL` pointing at floci, `deploy.sh` pushes to
+> the ECR URI reported by the ECR API. Under podman it builds for the host architecture (no qemu needed);
+> set `CONTAINER_PLATFORM=linux/arm64` to force ARM64. Real AgentCore Runtime still requires ARM64.
+
 ```
 ./deploy.sh
 ```

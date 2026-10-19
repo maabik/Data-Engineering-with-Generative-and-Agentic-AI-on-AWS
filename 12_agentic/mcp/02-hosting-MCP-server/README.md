@@ -49,6 +49,28 @@ For demonstration purposes, we will use a very simple MCP server with 3 tools: `
 
 * Hosting MCP Server
 
+## Shell deploy (`deploy.sh`)
+
+`deploy.sh` is an alternative to `deploy_redshift_mcp.py` that uses only the AWS
+CLI and a local container build. The Python script goes through
+`bedrock_agentcore_starter_toolkit`, which builds with CodeBuild and creates its
+AgentCore clients with explicit endpoints that ignore `AWS_ENDPOINT_URL`, so it
+cannot target a local emulator such as floci.
+
+```bash
+COGNITO_PASSWORD='<a strong password>' ./deploy.sh
+```
+
+It creates the runtime role, the `RedshiftMCPUserPool` / `RedshiftMCPClient`
+Cognito resources, builds and pushes the image, creates the runtime (MCP
+protocol, Cognito JWT authorizer) and stores `/mcp/redshift/credentials` and
+`/mcp/redshift/agent_arn`. On a podman host the image is built for the host
+architecture; set `CONTAINER_PLATFORM=linux/arm64` to force ARM64.
+
+`requirements_redshift.txt` pins `awslabs.redshift-mcp-server>=0.0.34,<0.1`:
+the server imports it, and newer releases require `mcp>=2`, which conflicts with
+the `mcp<2` pin used across this repo.
+
 ## Teardown
 
 This tutorial provisions billable AWS resources — including a **Cognito user pool**

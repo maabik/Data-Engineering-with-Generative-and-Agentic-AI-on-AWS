@@ -82,6 +82,10 @@ Prereqs:
 - Either Docker or Finch installed locally for the AgentCore Runtime image
   build (must build `linux/arm64`).
 
+> **Local emulator (floci) + podman:** with `AWS_ENDPOINT_URL` pointing at floci, `deploy.sh` pushes to
+> the ECR URI reported by the ECR API. Under podman it builds for the host architecture (no qemu needed);
+> set `CONTAINER_PLATFORM=linux/arm64` to force ARM64. Real AgentCore Runtime still requires ARM64.
+
 ```bash
 ./deploy.sh
 
@@ -200,8 +204,9 @@ checked in:
 
 ## Known caveats
 
-- Container build needs `linux/arm64` regardless of host CPU. `deploy.sh`
-  detects Docker (`buildx`) or Finch (`buildctl`).
+- Container build targets `linux/arm64` (AgentCore Runtime requirement); under
+  podman it defaults to the host architecture. `deploy.sh` detects Docker
+  (`buildx`), podman or Finch (`buildctl`).
 - The agent occasionally regenerates a definition once when the first pass
   has retry rules outside the allowlist — that's the loop earning its keep.
 - `update-agent-runtime` does **not** auto-pick up a re-pushed image with the
