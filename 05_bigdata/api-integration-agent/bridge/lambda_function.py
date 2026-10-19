@@ -33,6 +33,14 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 REGION = os.environ.get("AWS_REGION", "us-east-1")
+
+# Data-plane base URL. AWS_ENDPOINT_URL is set when running against a local emulator (e.g. floci);
+# it is unset on real AWS Lambda, which keeps the regional AgentCore endpoint.
+AGENTCORE_BASE_URL = (
+    os.environ.get("AWS_ENDPOINT_URL_BEDROCK_AGENTCORE")
+    or os.environ.get("AWS_ENDPOINT_URL")
+    or f"https://bedrock-agentcore.{REGION}.amazonaws.com"
+).rstrip("/")
 RUNTIME_ARN = os.environ["RUNTIME_ARN"]
 GATEWAY_CREDS_SECRET = os.environ["GATEWAY_CREDS_SECRET"]
 REQUEST_PREFIX = os.environ.get("REQUEST_PREFIX", "api-requests/")
@@ -57,7 +65,7 @@ def _invoke_runtime(payload: dict) -> str:
     token = _bearer_token()
     encoded = urllib.parse.quote(RUNTIME_ARN, safe="")
     url = (
-        f"https://bedrock-agentcore.{REGION}.amazonaws.com/runtimes/"
+        f"{AGENTCORE_BASE_URL}/runtimes/"
         f"{encoded}/invocations?qualifier=DEFAULT"
     )
     body = json.dumps(payload).encode("utf-8")
