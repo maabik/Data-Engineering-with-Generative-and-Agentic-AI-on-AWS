@@ -89,7 +89,14 @@ def _bedrock_agents(region: str, by_log_group: dict[str, Any]) -> list[dict[str,
     except (ClientError, KeyError):
         return out
 
-    for page in paginator.paginate():
+    try:
+        pages = list(paginator.paginate())
+    except ClientError as e:
+        # Classic Bedrock Agents are optional (e.g. a local emulator may not serve them).
+        print(f"  warn: could not list classic Bedrock agents in {region}: {e}", file=sys.stderr)
+        return out
+
+    for page in pages:
         for a in page.get("agentSummaries", []):
             if a.get("agentStatus") != "PREPARED":
                 continue
