@@ -11,6 +11,21 @@ from datetime import timedelta
 from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
 
+import os
+
+
+def _agentcore_base_url(region: str) -> str:
+    """AgentCore data-plane base URL.
+
+    AWS_ENDPOINT_URL points at a local emulator (e.g. floci); it is unset on real AWS,
+    which keeps the regional endpoint.
+    """
+    return (
+        os.environ.get("AWS_ENDPOINT_URL_BEDROCK_AGENTCORE")
+        or os.environ.get("AWS_ENDPOINT_URL")
+        or f"https://bedrock-agentcore.{region}.amazonaws.com"
+    ).rstrip("/")
+
 async def main():
     """Test the deployed Redshift MCP server."""
     boto_session = Session()
@@ -43,7 +58,7 @@ async def main():
     
     # Construct MCP URL
     encoded_arn = agent_arn.replace(':', '%3A').replace('/', '%2F')
-    mcp_url = f"https://bedrock-agentcore.{region}.amazonaws.com/runtimes/{encoded_arn}/invocations?qualifier=DEFAULT"
+    mcp_url = f"{_agentcore_base_url(region)}/runtimes/{encoded_arn}/invocations?qualifier=DEFAULT"
     headers = {
         "authorization": f"Bearer {bearer_token}",
         "Content-Type": "application/json"

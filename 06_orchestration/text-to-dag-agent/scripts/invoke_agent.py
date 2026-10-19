@@ -14,6 +14,19 @@ import urllib.parse
 import boto3
 import requests
 
+
+def _agentcore_base_url(region: str) -> str:
+    """AgentCore data-plane base URL.
+
+    AWS_ENDPOINT_URL points at a local emulator (e.g. floci); it is unset on real AWS,
+    which keeps the regional endpoint.
+    """
+    return (
+        os.environ.get("AWS_ENDPOINT_URL_BEDROCK_AGENTCORE")
+        or os.environ.get("AWS_ENDPOINT_URL")
+        or f"https://bedrock-agentcore.{region}.amazonaws.com"
+    ).rstrip("/")
+
 REGION = os.environ.get("AWS_REGION", "us-east-1")
 RUNTIME_ARN = os.environ["RUNTIME_ARN"]
 SECRET_NAME = os.environ["SECRET_NAME"]
@@ -37,7 +50,7 @@ def invoke(prompt: str) -> str:
     token = get_token()
     encoded = urllib.parse.quote(RUNTIME_ARN, safe="")
     url = (
-        f"https://bedrock-agentcore.{REGION}.amazonaws.com/runtimes/{encoded}"
+        f"{_agentcore_base_url(REGION)}/runtimes/{encoded}"
         f"/invocations?qualifier=DEFAULT"
     )
     headers = {

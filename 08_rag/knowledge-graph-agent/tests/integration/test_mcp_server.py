@@ -10,6 +10,19 @@ import os
 
 import pytest
 
+
+def _agentcore_base_url(region: str) -> str:
+    """AgentCore data-plane base URL.
+
+    AWS_ENDPOINT_URL points at a local emulator (e.g. floci); it is unset on real AWS,
+    which keeps the regional endpoint.
+    """
+    return (
+        os.environ.get("AWS_ENDPOINT_URL_BEDROCK_AGENTCORE")
+        or os.environ.get("AWS_ENDPOINT_URL")
+        or f"https://bedrock-agentcore.{region}.amazonaws.com"
+    ).rstrip("/")
+
 pytestmark = pytest.mark.skipif(
     os.environ.get("KG_INTEGRATION") != "1",
     reason="KG_INTEGRATION=1 not set",
@@ -40,7 +53,7 @@ def test_mcp_list_tools():
     )
     bearer = auth["AuthenticationResult"]["AccessToken"]
     encoded = agent_arn.replace(":", "%3A").replace("/", "%2F")
-    url = f"https://bedrock-agentcore.{region}.amazonaws.com/runtimes/{encoded}/invocations?qualifier=DEFAULT"
+    url = f"{_agentcore_base_url(region)}/runtimes/{encoded}/invocations?qualifier=DEFAULT"
 
     async def _check():
         headers = {

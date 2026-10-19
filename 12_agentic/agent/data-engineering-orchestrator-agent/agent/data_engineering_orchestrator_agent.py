@@ -27,6 +27,19 @@ from bedrock_agentcore.runtime import BedrockAgentCoreApp
 from strands import Agent, tool
 from strands.models import BedrockModel
 
+
+def _agentcore_base_url(region: str) -> str:
+    """AgentCore data-plane base URL.
+
+    AWS_ENDPOINT_URL points at a local emulator (e.g. floci); it is unset on real AWS,
+    which keeps the regional endpoint.
+    """
+    return (
+        os.environ.get("AWS_ENDPOINT_URL_BEDROCK_AGENTCORE")
+        or os.environ.get("AWS_ENDPOINT_URL")
+        or f"https://bedrock-agentcore.{region}.amazonaws.com"
+    ).rstrip("/")
+
 DEFAULT_REGION = os.environ.get("AWS_REGION", "us-east-1")
 MODEL_ID = os.environ.get("MODEL_ID", "us.anthropic.claude-sonnet-4-6")
 REGISTRY_JSON = os.environ.get("AGENT_REGISTRY_JSON", "{}")
@@ -88,7 +101,7 @@ def _invoke_with_jwt(arn: str, region: str, secret_name: str, payload: dict) -> 
     token = _bearer_token(secret_name, region)
     encoded = urllib.parse.quote(arn, safe="")
     url = (
-        f"https://bedrock-agentcore.{region}.amazonaws.com/runtimes/{encoded}"
+        f"{_agentcore_base_url(region)}/runtimes/{encoded}"
         f"/invocations?qualifier=DEFAULT"
     )
     body = json.dumps(payload).encode("utf-8")

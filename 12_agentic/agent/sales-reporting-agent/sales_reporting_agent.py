@@ -17,6 +17,19 @@ from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
 from typing import Dict, Any
 
+
+def _agentcore_base_url(region: str) -> str:
+    """AgentCore data-plane base URL.
+
+    AWS_ENDPOINT_URL points at a local emulator (e.g. floci); it is unset on real AWS,
+    which keeps the regional endpoint.
+    """
+    return (
+        os.environ.get("AWS_ENDPOINT_URL_BEDROCK_AGENTCORE")
+        or os.environ.get("AWS_ENDPOINT_URL")
+        or f"https://bedrock-agentcore.{region}.amazonaws.com"
+    ).rstrip("/")
+
 # Configuration
 REGION = "us-east-1"
 MODEL_ID = "us.anthropic.claude-sonnet-4-6"
@@ -213,7 +226,7 @@ async def call_mcp_tool(tool_name: str, arguments: dict = None, session = None) 
             bearer_token = auth_response['AuthenticationResult']['AccessToken']
             
             encoded_arn = agent_arn.replace(':', '%3A').replace('/', '%2F')
-            mcp_url = f"https://bedrock-agentcore.{REGION}.amazonaws.com/runtimes/{encoded_arn}/invocations?qualifier=DEFAULT"
+            mcp_url = f"{_agentcore_base_url(REGION)}/runtimes/{encoded_arn}/invocations?qualifier=DEFAULT"
             headers = {
                 "authorization": f"Bearer {bearer_token}",
                 "Content-Type": "application/json",

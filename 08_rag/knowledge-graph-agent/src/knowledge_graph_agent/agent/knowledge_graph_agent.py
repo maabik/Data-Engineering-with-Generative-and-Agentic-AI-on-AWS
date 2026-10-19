@@ -23,6 +23,19 @@ from mcp.client.streamable_http import streamablehttp_client
 from strands import Agent, tool
 from strands.models import BedrockModel
 
+
+def _agentcore_base_url(region: str) -> str:
+    """AgentCore data-plane base URL.
+
+    AWS_ENDPOINT_URL points at a local emulator (e.g. floci); it is unset on real AWS,
+    which keeps the regional endpoint.
+    """
+    return (
+        os.environ.get("AWS_ENDPOINT_URL_BEDROCK_AGENTCORE")
+        or os.environ.get("AWS_ENDPOINT_URL")
+        or f"https://bedrock-agentcore.{region}.amazonaws.com"
+    ).rstrip("/")
+
 REGION = os.environ.get("AWS_REGION", "us-east-1")
 MODEL_ID = os.environ.get("KG_AGENT_MODEL_ID", "us.anthropic.claude-sonnet-4-6")
 AGENT_ARN_PARAM = os.environ.get("KG_MCP_AGENT_ARN_PARAM", "/kg/mcp/agent_arn")
@@ -71,7 +84,7 @@ def _mcp_url_and_token() -> tuple[str, str]:
 
     encoded_arn = agent_arn.replace(":", "%3A").replace("/", "%2F")
     url = (
-        f"https://bedrock-agentcore.{REGION}.amazonaws.com/"
+        f"{_agentcore_base_url(REGION)}/"
         f"runtimes/{encoded_arn}/invocations?qualifier=DEFAULT"
     )
     return url, bearer
