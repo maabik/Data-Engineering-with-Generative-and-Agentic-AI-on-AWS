@@ -23,7 +23,7 @@ dependencies = [
 
 [project.optional-dependencies]
 mcp = [
-    "mcp",
+    "mcp<2",
     "bedrock-agentcore",
     "bedrock-agentcore-starter-toolkit",
 ]
